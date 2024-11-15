@@ -1,0 +1,111 @@
+/* src/styles/App.css */
+
+#root {
+  max-width: 1280px;
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f7f3e9; /* A light, warm background */
+  font-family: 'Harry P', sans-serif; /* Example: use a Harry Potter-themed font if available */
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+  background-color: #fff; /* White background for cards */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px); /* Lift effect on hover */
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Feed and Profile Specific Styles */
+.feed-post {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #e2e2e2; /* Light grey for posts */
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+
+.feed-post:hover {
+  background-color: #d1d1d1; /* Darker grey on hover */
+}
+
+.character-profile {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+/* Links */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Typography */
+h1, h2, h3 {
+  color: #333;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: #555;
+}
