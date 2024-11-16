@@ -3,5 +3,20 @@
     top: 0;
     left: 0;
     width: 100vw;
-    padding: 0 50px;
+    padding: 10px 50px;
+    /* background-color: gray; */
+    justify-content: center;
+}
+.header nav {
+    display: inline;
+    align-items: center;
+    margin: 0 auto;
+}
+.header nav a {
+    color: aliceblue;
+    margin: 0 30px;
+}
+.header h1 {
+    display: inline;
+    margin-right: auto;
 }

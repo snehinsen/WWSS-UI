@@ -4,6 +4,7 @@ import { ScrollPanel } from "primereact/scrollpanel";
 import { Card } from "primereact/card";
 import "../syles/feed.css";
 import { Button } from "primereact/button";
+import { getFeed } from "./api";
 
 interface Post {
   id: number;
@@ -17,10 +18,7 @@ function Feed() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:8544/api/feed");
-        let data = response.data;
-        console.log(data);
-        setPosts(data);
+        setPosts(await getFeed());
       } catch (error) {
         console.error("Error fetching posts:", error);
       }

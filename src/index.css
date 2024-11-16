@@ -1,8 +1,20 @@
+
 @font-face {
     font-family: 'harry_p';
     src: url('./assets/fonts/hp.ttf') format('truetype'); /* For .ttf files */
     font-weight: normal;
     font-style: normal;
+}
+html, body, #root {
+    margin: 0;
+    padding: 30px;
+    height: 100%;
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .title {
@@ -14,4 +26,11 @@
 
 a {
     text-decoration: none;
+}
+
+.placeholder {
+    font-size: 1rem;
+    color: #888;
+    text-align: center;
+    margin-top: 2rem;
 }

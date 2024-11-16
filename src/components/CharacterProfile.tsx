@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../syles/CharacterProfile.css";
 import { ScrollPanel } from "primereact/scrollpanel";
+import { getProfile } from "./api";
 
 interface Character {
   name: string;
@@ -18,19 +19,11 @@ function CharacterProfile({ name }: Props) {
 
   useEffect(() => {
     if (name === undefined) {
-      return <></>;
       console.error("name undefined");
+      return <></>;
     }
     const fetchCharacter = async () => {
-      const fetchURL = "http://localhost:8544/api/profile/" + name;
-      console.log("Fetching from: " + fetchURL);
-      try {
-        const response = await fetch(fetchURL);
-        const data = await response.json();
-        setCharacter(data);
-      } catch (error) {
-        console.error("Error fetching character:", error);
-      }
+      setCharacter(await getProfile(name));
     };
     fetchCharacter();
   }, []);

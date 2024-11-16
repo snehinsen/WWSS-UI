@@ -10,9 +10,7 @@ function ProfilePage() {
   return (
     <>
       <Header />
-      <div>
-        <CharacterProfile name={username || "none"} />
-      </div>
+      <CharacterProfile name={username || "none"} />
     </>
   );
 }
