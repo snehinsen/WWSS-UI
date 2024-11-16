@@ -4,7 +4,7 @@ import "../syles/header.css";
 function Header() {
   return (
     <header className="header">
-      <a href="/">
+      <a href="/feed">
         <h1 className="title">WWSS</h1>
         <Menu />
       </a>
