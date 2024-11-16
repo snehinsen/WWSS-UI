@@ -1,0 +1,17 @@
+@font-face {
+    font-family: 'harry_p';
+    src: url('./assets/fonts/hp.ttf') format('truetype'); /* For .ttf files */
+    font-weight: normal;
+    font-style: normal;
+}
+
+.title {
+   color: gold;
+   font-family: "harry_p";
+   font-weight: bold; 
+   
+}
+
+a {
+    text-decoration: none;
+}

@@ -1,3 +1,4 @@
+import { Button } from "primereact/button";
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -6,7 +7,9 @@ function HomePage() {
     <div>
       <h1>Welcome to Wizarding World Social!</h1>
       <p>A magical social media experience with your favorite characters!</p>
-      <Link to="/feed">Go to Feed</Link>
+      <a href="/feed">
+        <Button>Go to feed</Button>
+      </a>
     </div>
   );
 }

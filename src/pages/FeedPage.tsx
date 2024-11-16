@@ -1,13 +1,16 @@
-// src/pages/FeedPage.tsx
 import React from "react";
 import Feed from "../components/Feed";
+import Header from "../components/Header";
 
 function FeedPage() {
   return (
-    <div>
-      <h2>Feed</h2>
-      <Feed />
-    </div>
+    <>
+      <div>
+        <Header />
+        <h2>Feed</h2>
+        <Feed />
+      </div>
+    </>
   );
 }
 
