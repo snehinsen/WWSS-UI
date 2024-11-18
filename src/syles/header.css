@@ -4,8 +4,9 @@
     left: 0;
     width: 100vw;
     padding: 10px 50px;
-    /* background-color: gray; */
+    background-color: #343a3c;
     justify-content: center;
+    z-index: 2;
 }
 .header nav {
     display: inline;
@@ -19,4 +20,39 @@
 .header h1 {
     display: inline;
     margin-right: auto;
+}
+
+.menuButton{
+    display: none;
+}
+@media (max-width: 999px) {
+    .header {
+        width: 100px;
+        padding: 5px;
+        height: 100%;
+        display: none;
+    }
+    .header.shown {
+        display: block;
+    }
+    .header h1 {
+        display: block;
+        align-content: flex-start;
+        margin: 0 1px;
+        /* padding: 10px; */
+    }
+    .header nav {
+        display: block;
+        align-items: center;
+        margin: 0 auto;
+        text-align: center;
+
+    }
+    .header nav a {
+        margin: 10px 0;
+        display: block;
+    }
+    .menuButton {
+        display: block;
+    }
 }

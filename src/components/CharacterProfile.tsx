@@ -58,7 +58,7 @@ function CharacterProfile({ name }: Props) {
               </ul>
             ) : (
               <p className="placeholder">
-                {character.name.split(" ")[0] + " is loanly :("}
+                {character.name.split(" ")[0] + " is lonely :("}
               </p>
             )}
           </div>

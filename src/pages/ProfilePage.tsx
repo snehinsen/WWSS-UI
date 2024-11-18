@@ -9,7 +9,7 @@ function ProfilePage() {
   console.log(useParams());
   return (
     <>
-      <Header />
+      <Header headerType="logged-in" />
       <CharacterProfile name={username || "none"} />
     </>
   );
