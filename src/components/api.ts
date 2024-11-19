@@ -11,6 +11,12 @@ interface Character {
   friends: string[];
 }
 
+interface Comment {
+  id: number,
+  body: string,
+  username: string,
+}
+
 export async function getFeed() {
   const response = await axios.get("http://localhost:8544/api/feed");
   return response.data;
@@ -27,23 +33,27 @@ export async function getHandleFromPost(postId: number) {
   const getPostResponse = await axios.get(
     "http://localhost:8544/api/getPost?id=" + postId
   );
-  console.log(getPostResponse.data);
   const getUserResponse = await axios.get(
     "http://localhost:8544/api/profile/" + getPostResponse.data.username
   );
   const user = getUserResponse.data;
-  // console.log(user);
-  // console.log(getPostResponse.data);
   let handle = user.handle;
   handle = "@" + handle;
-  console.log("Handle: " + handle);
-
   return handle;
 }
 
 export async function createPost(username: string, body: string) {
   console.log("Posting...");
   await axios.post(
-    "http://localhost:8540/api/addPost?username=" + username + "&body=" + body
+    "http://localhost:8544/api/addPost?username=" + 
+    username + 
+    "&body=" + encodeURIComponent(body)
   );
+}
+
+export async function getPostComments(id:number) {
+  const comments = await axios.get(
+    "http://localhost:8544/api/getPostComments/" + id
+  );
+  return comments.data;
 }

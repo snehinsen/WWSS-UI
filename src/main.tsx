@@ -4,6 +4,7 @@ import App from "./App";
 import { PrimeReactProvider, PrimeReactContext } from "primereact/api";
 import "primereact/resources/primereact.css";
 import "primereact/resources/themes/arya-green/theme.css";
+import "primeicons/primeicons.css";
 
 createRoot(document.getElementById("root")!).render(
   <PrimeReactProvider>

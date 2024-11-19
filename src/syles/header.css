@@ -1,58 +1,64 @@
+/* General Header Styles */
 .header {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    padding: 10px 50px;
+    width: 100%;
     background-color: #343a3c;
-    justify-content: center;
     z-index: 2;
+    padding: 10px 50px;
 }
-.header nav {
-    display: inline;
-    align-items: center;
-    margin: 0 auto;
-}
-.header nav a {
-    color: aliceblue;
-    margin: 0 30px;
-}
+
 .header h1 {
     display: inline;
     margin-right: auto;
 }
-
-.menuButton{
-    display: none;
+.header nav {
+    display: inline;
+    margin-left: 10px;
 }
-@media (max-width: 999px) {
-    .header {
-        width: 100px;
-        padding: 5px;
-        height: 100%;
-        display: none;
-    }
-    .header.shown {
-        display: block;
-    }
-    .header h1 {
-        display: block;
-        align-content: flex-start;
-        margin: 0 1px;
-        /* padding: 10px; */
-    }
-    .header nav {
-        display: block;
-        align-items: center;
-        margin: 0 auto;
-        text-align: center;
+.header nav a {
+    color: white;
+    margin: 0 10px;
+}
 
-    }
-    .header nav a {
-        margin: 10px 0;
-        display: block;
-    }
-    .menuButton {
-        display: block;
-    }
+.header.logged-in {
+    padding: 3px;
+}
+
+.menuButton {
+    border: none;
+    background: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-right: 20px;
+}
+
+.menuButton:hover {
+    color: #ddd;
+}
+
+.p-sidebar-lg {
+    background-color: #343a3c;
+    color: white;
+    width: 150px;
+}
+
+.p-sidebar-lg h3 {
+    color: #ffffff;
+    margin: 0 0 10px;
+}
+
+.sidebar-link {
+    display: block;
+    color: aliceblue;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 3px;
+    margin: 5px 0;
+}
+
+.sidebar-link:hover {
+    background-color: #424648;
 }

@@ -1,4 +1,6 @@
+import React, { useState } from "react";
 import { Button } from "primereact/button";
+import { Sidebar } from "primereact/sidebar";
 import "../syles/header.css";
 
 interface Props {
@@ -6,25 +8,16 @@ interface Props {
 }
 
 function Header({ headerType }: Props) {
-  function toggleSidebar() {
-    const header = document.getElementById("header");
-    header?.classList.toggle("shown");
-  }
-  if (headerType == "landing") {
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
+  };
+
+  if (headerType === "landing") {
     return (
       <>
-        {window.innerWidth <= 999 ? (
-          <>
-            <Button
-              icon="pi pi-menu"
-              label="show sidebar"
-              className="menuButton"
-              id="menubutton"
-              onClick={toggleSidebar()}
-            />
-          </>
-        ) : null}
-        <header className="header" id="header">
+        <header className="header">
           <a href="/">
             <h1 className="title">WWSS</h1>
           </a>
@@ -35,20 +28,48 @@ function Header({ headerType }: Props) {
         </header>
       </>
     );
-  } else if (headerType == "logged-in") {
+  } else if (headerType === "logged-in") {
     return (
-      <header className="header">
-        <a href="/feed">
-          <h1 className="title">WWSS</h1>
-        </a>
-        <nav>
-          <a href="/feed">Feed</a>
-          <a href="/dms">your DMs</a>
-          <a href="/profile/harrypotter">your Profile</a>
-        </nav>
-      </header>
+      <>
+        <header className="header logged-in" id="header">
+          <Button
+            icon="pi pi-bars"
+            className="menuButton"
+            id="menubutton"
+            onClick={toggleSidebar}
+          />
+          <a href="/feed">
+            <h1 className="title">WWSS</h1>
+          </a>
+        </header>
+
+        <Sidebar
+          visible={isSidebarVisible}
+          onHide={toggleSidebar}
+          position="left"
+          className="p-sidebar-lg"
+        >
+          <a onClick={toggleSidebar}>
+            <h1 className="title">WWSS</h1>
+          </a>
+          <h3>Menu</h3>
+          <nav>
+            <a href="/feed" className="sidebar-link">
+              Feed
+            </a>
+            <a href="/dms" className="sidebar-link">
+              Your DMs
+            </a>
+            <a href="/profile/harrypotter" className="sidebar-link">
+              Your Profile
+            </a>
+          </nav>
+        </Sidebar>
+      </>
     );
   }
+
+  return null;
 }
 
 export default Header;

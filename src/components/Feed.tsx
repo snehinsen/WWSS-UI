@@ -7,19 +7,18 @@ import { getFeed, getHandleFromPost } from "./api";
 import MakePost from "./makePost";
 import { Panel } from "primereact/panel";
 import Markdown from "react-markdown";
+import Reply from "./Reply";
+import Comments from "./Comments";
 
 interface Post {
   id: number;
   body: string;
   username: string;
-}
-
-interface PostWithHandle extends Post {
-  handle?: string; // Add an optional field for the handle
+  handle?: string;
 }
 
 function Feed() {
-  const [posts, setPosts] = useState<PostWithHandle[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -53,14 +52,14 @@ function Feed() {
               <p>{post.handle || "Loading handle..."}</p>
               <Markdown>{post.body}</Markdown>
               <Panel header="Replies">
-                <p>No one replied yet</p>
-                <Button link label="Reply" severity="secondary" />
+                <Reply id={post.id} />
+                <Comments postId={post.id} />
               </Panel>
             </Panel>
           ))
         ) : (
           <div>
-            <p>Failed to load posts</p>
+            <p>Nothing to see here folks</p>
           </div>
         )}
       </ScrollPanel>

@@ -1,4 +1,11 @@
 .postItem {
-    min-width: 5vw;
+    min-width: 60vw;
     margin: 10px 0;
+}
+
+.actionButton {
+    color: white;
+    border: none;
+    width: 50vh;
+    padding: 0%;
 }
