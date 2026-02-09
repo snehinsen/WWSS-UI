@@ -1,75 +1,104 @@
-import React, { useState } from "react";
-import { Button } from "primereact/button";
-import { Sidebar } from "primereact/sidebar";
-import "../syles/header.css";
+import {useState} from "react";
+import {Box, Drawer, Flex, Heading, IconButton, Link, Text, VStack,} from "@chakra-ui/react";
+import {FaBurger} from "react-icons/fa6";
 
 interface Props {
-  headerType: string;
+    headerType: string;
 }
 
-function Header({ headerType }: Props) {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+function Header({headerType}: Props) {
+    const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsSidebarVisible(!isSidebarVisible);
-  };
+    const toggleSidebar = () => {
+        setIsSidebarVisible((prev) => !prev);
+    };
 
-  if (headerType === "landing") {
-    return (
-      <>
-        <header className="header">
-          <a href="/">
-            <h1 className="title">WWSS</h1>
-          </a>
-          <nav>
-            <a href="/product">Product</a>
-            <a href="/about">About Us</a>
-          </nav>
-        </header>
-      </>
-    );
-  } else if (headerType === "logged-in") {
-    return (
-      <>
-        <header className="header logged-in" id="header">
-          <Button
-            icon="pi pi-bars"
-            className="menuButton"
-            id="menubutton"
-            onClick={toggleSidebar}
-          />
-          <a href="/feed">
-            <h1 className="title">WWSS</h1>
-          </a>
-        </header>
+    if (headerType === "landing") {
+        return (
+            <Box as="header" className="header">
+                <Flex align="center" justify="space-between">
+                    <Link href="/app">
+                        <Heading size="3xl" className="title">
+                            WWSS
+                        </Heading>
+                    </Link>
 
-        <Sidebar
-          visible={isSidebarVisible}
-          onHide={toggleSidebar}
-          position="left"
-          className="p-sidebar-lg"
-        >
-          <a onClick={toggleSidebar}>
-            <h1 className="title">WWSS</h1>
-          </a>
-          <h3>Menu</h3>
-          <nav>
-            <a href="/feed" className="sidebar-link">
-              Feed
-            </a>
-            <a href="/dms" className="sidebar-link">
-              Your DMs
-            </a>
-            <a href="/profile/harrypotter" className="sidebar-link">
-              Your Profile
-            </a>
-          </nav>
-        </Sidebar>
-      </>
-    );
-  }
+                    <Flex as="nav" gap={4}>
+                        <Link href="/app/product">Product</Link>
+                        <Link href="/app/about">About Us</Link>
+                    </Flex>
+                </Flex>
+            </Box>
+        );
+    }
 
-  return null;
+    if (headerType === "logged-in") {
+        // @ts-ignore
+        return (
+            <>
+                <Box as="header" className="header logged-in" id="header">
+                    <Flex align="center" gap={3}>
+                        <IconButton
+                            aria-label="Open menu"
+                            onClick={toggleSidebar}
+                            variant="ghost"
+                        >
+                            <FaBurger/>
+                        </IconButton>
+
+                        <Heading size="lg" className="title">
+                            <Link href="/feed">
+                                WWSS
+                            </Link>
+                        </Heading>
+                    </Flex>
+                </Box>
+
+                <Drawer.Root
+                    open={isSidebarVisible}
+                    placement="start"
+                    onOpenChange={({open}) => setIsSidebarVisible(open)}
+                    size="sm"
+                >
+                    <Drawer.Backdrop/>
+                    <Drawer.Positioner>
+                        <Drawer.Content>
+                            <Drawer.CloseTrigger/>
+
+                            <Drawer.Body>
+                                <VStack align="start" gap={4} mt={8}>
+                                    <Link href="/app//feed" onClick={toggleSidebar}>
+                                        <Heading size="md" className="title">
+                                            WWSS
+                                        </Heading>
+                                    </Link>
+
+                                    <Text fontWeight="bold">Menu</Text>
+
+                                    <VStack align="start" gap={2}>
+                                        <Link href="/app/feed" onClick={toggleSidebar}>
+                                            Feed
+                                        </Link>
+                                        <Link href="/dms" onClick={toggleSidebar}>
+                                            Your DMs
+                                        </Link>
+                                        <Link
+                                            href="/profile/harrypotter"
+                                            onClick={toggleSidebar}
+                                        >
+                                            Your Profile
+                                        </Link>
+                                    </VStack>
+                                </VStack>
+                            </Drawer.Body>
+                        </Drawer.Content>
+                    </Drawer.Positioner>
+                </Drawer.Root>
+            </>
+        );
+    }
+
+    return null;
 }
 
 export default Header;

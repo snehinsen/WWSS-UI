@@ -1,13 +1,13 @@
-import { createRoot } from "react-dom/client";
+import {createRoot} from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { PrimeReactProvider, PrimeReactContext } from "primereact/api";
-import "primereact/resources/primereact.css";
-import "primereact/resources/themes/arya-green/theme.css";
-import "primeicons/primeicons.css";
+import {Provider} from "./components/ui/provider.tsx";
 
-createRoot(document.getElementById("root")!).render(
-  <PrimeReactProvider>
-    <App />
-  </PrimeReactProvider>
+// @ts-ignore
+createRoot(document.getElementById("root")).render(
+    (
+        <Provider>
+            <App/>
+        </Provider>
+    )
 );

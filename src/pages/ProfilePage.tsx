@@ -1,6 +1,5 @@
-import React from "react";
 import { useParams } from "react-router-dom";
-import CharacterProfile from "../components/CharacterProfile";
+import UserProfile from "../components/UserProfile.tsx";
 import Header from "../components/Header";
 
 function ProfilePage() {
@@ -10,7 +9,7 @@ function ProfilePage() {
   return (
     <>
       <Header headerType="logged-in" />
-      <CharacterProfile name={username || "none"} />
+      <UserProfile name={username || "none"} />
     </>
   );
 }
