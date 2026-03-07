@@ -1,3 +1,30 @@
+// User related types
+
+export interface User {
+    "bio": string,
+    "email": string,
+    "friends": User[],
+    "handle": string,
+    "id": number,
+    "isBot": boolean,
+    "isWizarding": boolean,
+    "name": string,
+    "pfp": string
+}
+
+export interface UserRegistration {
+    name: string,
+    email: string,
+    password: string,
+}
+
+// Single use types
+export interface UserHandle {
+    handle: string;
+}
+
+// Post related types
+
 export interface Post {
     "body": string,
     "attachedImages": [],
@@ -5,21 +32,3 @@ export interface Post {
     "id": number
 }
 
-export interface User {
-    "bio": string,
-    "email": string,
-    "friends": number[],
-    "handle": string,
-    "id": number,
-    "isBot": boolean,
-    "isWizarding": boolean,
-    "name": string,
-    "password": "",
-    "pfp": string
-}
-
-export interface Comment {
-    id: number,
-    body: string,
-    username: string,
-}

@@ -1,0 +1,66 @@
+import Markdown from "@uiw/react-markdown-preview";
+import MDMappings from "../editor/MDMappings.tsx";import {Post} from "../../backend/types"
+import {Avatar, Box, Heading, HStack, Link, Text, VStack} from "@chakra-ui/react";
+import {useThemeColors} from "../ui/theme.ts";
+
+
+interface Props {
+    comment: Post;
+}
+
+function Comment({ comment }: Props) {
+    const theme = useThemeColors();
+    return (
+        <Box
+            bg={theme.cardBg}
+            w="100%"
+            minW={0}
+            p={{ base: 3, md: 4 }}
+            borderRadius={{ base: "0.5rem", md: "0.75rem" }}
+            shadow="sm"
+        >
+            <HStack gap={{ base: 2, md: 3 }} align="start" w="100%" minW={0} flexWrap="wrap">
+                {/* Avatar */}
+                <Avatar.Root size="md" minW={0}>
+                    <Avatar.Image src={comment.user.pfp} alt={`${comment.user.name}'s avatar`} />
+                    <Avatar.Fallback>{comment.user.name.charAt(0)}</Avatar.Fallback>
+                </Avatar.Root>
+
+                {/* Comment content */}
+                <VStack align="start" gap={1} w={{ base: "100%", md: "calc(100% - 3rem)" }} minW={0}>
+                    <Box>
+                        <Link
+                            href={`/app/profile/${comment.user.handle}`}
+                        >
+                            <Heading
+                                size={{ base: "3xl", md: "md" }}
+                                className="title"
+                            >
+                                {comment.user.name || "Loading..."}
+                            </Heading>
+                        </Link>
+                        <Text
+                            fontSize={{ base: "xs", md: "sm" }}
+                            color={theme.mutedText}
+                        >
+                            @{comment.user.handle || "Loading handle..."}
+                        </Text>
+                    </Box>
+
+                    {/* Markdown body */}
+                    <Box w="100%" minW={0}>
+                        <Markdown
+                            source={comment.body}
+                            components={MDMappings}
+                            wrapperElement={{ "data-color-mode": undefined }}
+                            style={{ background: "none" }}
+                        />
+                    </Box>
+                </VStack>
+            </HStack>
+        </Box>
+    )
+
+}
+
+export default Comment;

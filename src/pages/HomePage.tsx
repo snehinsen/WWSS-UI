@@ -8,7 +8,7 @@ function HomePage() {
             <VStack px="14" py="10" alignItems="self-start" gap={2}>
                 <Heading as="h1">Welcome to the Wizarding World Social Service!</Heading>
                 <p>A magical social media experience with your favorite characters!</p>
-                <a href="/feed" className=" p-button-success">
+                <a href="/app/feed" className=" p-button-success">
                     <Button variant="surface">
                         Get Started
                     </Button>

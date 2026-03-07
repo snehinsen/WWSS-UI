@@ -1,0 +1,29 @@
+@font-face {
+    font-family: 'harry_p';
+    src: url('../assets/fonts/hp.ttf') format('truetype'); /* For .ttf files */
+}
+
+html, body, #root {
+    color-scheme: dark light;
+}
+
+.title {
+    font-family: "harry_p";
+    font-weight: bold;
+    letter-spacing: 1px;
+    word-spacing: 2px;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    .title {
+        color: gold;
+    }
+}
+
+/* Light mode styles */
+@media (prefers-color-scheme: light) {
+    .title {
+        color: black;
+    }
+}

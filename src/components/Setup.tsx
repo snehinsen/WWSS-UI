@@ -1,4 +1,5 @@
 import {
+    Alert,
     Avatar,
     Box,
     Button,
@@ -12,6 +13,7 @@ import {
     HStack,
     IconButton,
     Input,
+    InputGroup,
     Portal,
     Select,
     Stack,
@@ -19,23 +21,53 @@ import {
 } from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
-import {BiUpload, BiWebcam} from "react-icons/bi";
-import {checkHandle} from "../backend/api";
-import {useColorModeValue} from "../components/ui/color-mode";
+import {BiAt, BiError, BiUpload, BiWebcam} from "react-icons/bi";
 import {CgClose} from "react-icons/cg";
+import {checkHandle, update, uploadProfilePicture} from "../backend/api";
+import {useThemeColors} from "./ui/theme.ts";
 
-function Setup() {
+export default function Setup() {
     const [pfp, setPfp] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [handle, setHandle] = useState("");
     const [bloodType, setBloodType] = useState("");
     const [handleAvailable, setHandleAvailable] = useState<boolean | null>(null);
+    const [handleValid, setValid] = useState<boolean>(true); // blank is technically valid as it's NO handle
     const [uploadOpen, setUploadOpen] = useState<boolean>(false);
-    // 🎨 SAME TOKENS AS SIGNUP PAGE
-    const bg = useColorModeValue("gray.50", "gray.900");
-    const cardBg = useColorModeValue("white", "gray.800");
-    const borderColor = useColorModeValue("gray.200", "gray.700");
-    const mutedText = useColorModeValue("gray.500", "gray.400");
+    const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null);
+    const [canSubmit, setCanSubmit] = useState<boolean | null>(null);
+    const colors = useThemeColors();
+
+    const onHandleUpdate = (value: string) => {
+        setHandle(value);
+        setValid(/^[a-zA-Z0-9_-]*$/.test(value));
+    }
+
+    let submittionErrorMessage = "";
+
+    const handleSubmit = () => {
+        if (!handleAvailable || !handle || bloodType === "") {
+            submittionErrorMessage = "Please ensure all required fields are valid. The following fields have an error:\n\n";
+
+            if (!handle) {
+                submittionErrorMessage += "The handle is required\n";
+            }
+
+            if (!handleAvailable) {
+                submittionErrorMessage += "The handle you selected is already in use by another user\n";
+            }
+
+            if (bloodType == "") {
+                submittionErrorMessage += "Please choose your blood type\n";
+            }
+
+            setCanSubmit(false);
+        } else {
+            setCanSubmit(true);
+            update(handle, bloodType);
+            window.location.href = "/app/feed";
+        }
+    }
 
     const types = createListCollection({
         items: [
@@ -47,10 +79,19 @@ function Setup() {
     });
 
     useEffect(() => {
-        if (!pfp) return setPreview(null);
-        const url = URL.createObjectURL(pfp);
-        setPreview(url);
-        return () => URL.revokeObjectURL(url);
+        const upload = async () => {
+            if (!pfp) return setPreview(null);
+            const url = URL.createObjectURL(pfp);
+            setPreview(url);
+            const uploadState: boolean = await uploadProfilePicture(pfp);
+            if (uploadState) {
+                setUploadSuccess(true);
+            } else {
+                setUploadSuccess(false);
+            }
+            return () => URL.revokeObjectURL(url);
+        }
+        upload().then();
     }, [pfp]);
 
     useEffect(() => {
@@ -62,19 +103,41 @@ function Setup() {
     }, [handle]);
 
     return (
-        <Center minH="100vh" bg={bg}>
+        <Center minH="100vh" bg={colors.bgPage}>
             <Container maxW="sm">
                 <Box
-                    bg={cardBg}
+                    bg={colors.cardBg}
                     p={8}
                     rounded="xl"
                     shadow="lg"
                     borderWidth="1px"
-                    borderColor={borderColor}
+                    borderColor={colors.border}
                 >
                     <Stack gap={6} textAlign="center">
                         <Heading size="lg">Set up your profile</Heading>
+                        {canSubmit === null || canSubmit ? (<></>) : (
+                            <Alert.Root status="error">
+                                <Alert.Indicator/>
+                                <Alert.Content>
+                                    <Alert.Title>Error saving your settings</Alert.Title>
+                                    <Alert.Description>{submittionErrorMessage}</Alert.Description>
+                                </Alert.Content>
+                            </Alert.Root>
+                        )}
 
+                        {uploadSuccess === null ? (
+                            <></>
+                        ) : (
+                            <Alert.Root status={uploadSuccess ? "success" : "error"}>
+                                <Alert.Indicator/>
+                                <Alert.Content>
+                                    <Alert.Title>{uploadSuccess ? "File saved Successfully" : "Upload failed"}</Alert.Title>
+                                    <Alert.Description>
+                                        {uploadSuccess ? "The file was saved successfully" : "Upload failed, please try again later"}
+                                    </Alert.Description>
+                                </Alert.Content>
+                            </Alert.Root>
+                        )}
                         {/* Avatar */}
                         <Box position="relative" display="inline-block" mx="auto">
                             <Avatar.Root size="2xl">
@@ -88,7 +151,7 @@ function Setup() {
                                 <Dialog.Trigger asChild onClick={() => setUploadOpen(true)}>
                                     <Button
                                         aria-label="Upload profile picture"
-                                        size="5xs"
+                                        size="2xs"
                                         variant="ghost"
                                         position="absolute"
                                         bottom={0}
@@ -135,7 +198,7 @@ function Setup() {
                                                         <HStack gap={3}>
                                                             <BiUpload size={28}/>
                                                             <Text
-                                                                color={mutedText}
+                                                                color={colors.mutedText}
                                                                 fontSize="sm"
                                                                 textAlign="center"
                                                                 whiteSpace="nowrap"
@@ -153,24 +216,31 @@ function Setup() {
                             </Dialog.Root>
                         </Box>
 
-                        {/* Form */}
                         <Stack gap={4}>
-                            <Field.Root>
+                            <Field.Root invalid={!handleValid}>
                                 <Field.Label>Handle</Field.Label>
-                                <Input
-                                    value={handle}
-                                    onChange={(e) => setHandle(e.target.value)}
-                                    placeholder="Your unique handle"
-                                    required
-                                    autoFocus
-                                    variant="subtle"
-                                />
+                                <Field.RequiredIndicator/>
+                                <InputGroup
+                                    startElement={<BiAt/>}>
+                                    <Input
+                                        value={handle}
+                                        onChange={(e) => onHandleUpdate(e.target.value)}
+                                        placeholder="Your unique handle"
+                                        required
+                                        autoFocus
+                                        variant="subtle"
+                                    />
+                                </InputGroup>
+                                <Field.ErrorText>
+                                    <BiError size={2}/>
+                                    Your handle may only contain letters, numbers, and "-" or "_"
+                                </Field.ErrorText>
                                 {handle && (
                                     <Text
                                         fontSize="sm"
                                         color={
                                             handleAvailable === null
-                                                ? mutedText
+                                                ? colors.mutedText
                                                 : handleAvailable
                                                     ? "green.500"
                                                     : "red.500"
@@ -187,6 +257,7 @@ function Setup() {
 
                             <Field.Root>
                                 <Field.Label>Blood Type</Field.Label>
+                                <Field.RequiredIndicator/>
                                 <Select.Root
                                     collection={types}
                                     value={[bloodType]}
@@ -218,16 +289,13 @@ function Setup() {
                                 </Select.Root>
                             </Field.Root>
 
-                            <Button colorScheme="blue" size="lg" onClick={() => setUploadOpen(true)}>
-                                Finish Onboarding
+                            <Button colorScheme="blue" size="lg" onClick={handleSubmit}>
+                                Finish setup
                             </Button>
                         </Stack>
                     </Stack>
                 </Box>
             </Container>
         </Center>
-    )
-        ;
+    );
 }
-
-export default Setup;

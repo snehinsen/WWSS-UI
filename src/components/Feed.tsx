@@ -1,70 +1,98 @@
-import {useEffect, useState} from "react";
-import {Box, Heading, Spinner, Text, VStack} from "@chakra-ui/react";
-import Markdown from "react-markdown";
-import {getFeed} from "../backend/api.ts";
-import MakePost from "./makePost";
-import Reply from "./Reply";
-import Comments from "./Comments";
-import "../syles/feed.css"
-import {useColorModeValue} from "./ui/color-mode.tsx";
-import {Post} from "../backend/types.ts";
+import { useEffect, useState } from "react";
+import { Box, Spinner, Text, VStack } from "@chakra-ui/react";
+import { getFeed } from "../backend/api.ts";
+import MakePost from "./PostMedia/makePost.tsx";
+import "../syles/feed.css";
+import { Post } from "../backend/types.ts";
+import PostCard from "./PostMedia/Post.tsx";
+import {useThemeColors} from "./ui/theme.ts";
 
 function Feed() {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const colors = useThemeColors();
+
+    const fetchPosts = async () => {
+        try {
+            const posts: Post[] = await getFeed();
+            setPosts(posts || []);
+            console.log(`Posts: ${posts}`);
+        } catch (error) {
+            console.error(error);
+            setPosts([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const posts: Post[] = await getFeed();
-                setPosts(posts);
-            } catch (error) {
-                console.error("Error fetching posts:", error);
-                setPosts([])
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPosts().then();
+        fetchPosts();
     }, []);
 
     return (
         <VStack
-            gap={4}
-            py={3}
-            alignSelf="center"
-            bg={useColorModeValue("white", "gray.900")}
-            maxWidth="400px">
-            <Box shadow="md" w="full" alignItems="center">
-                <MakePost/>
+            gap={{ base: 3, sm: 4, md: 5, lg: 6 }}
+            py={{ base: 3, sm: 4, md: 6 }}
+
+            /* critical for overflow fix */
+            minW={{
+                base: "100%",
+                sm: "10.rem",
+                md: "30rem",
+                lg: "35.5rem",
+                xl: "40.25rem",
+                "2xl": "45.25rem",
+            }}
+            w="100%"
+            mx="auto"
+            align="stretch"
+
+            /* proper breakpoints instead of fluid percentages */
+            maxW={{
+                base: "100%",   // mobile fluid
+                sm: "33.75rem", // 540px → tablet small
+                md: "42.5rem",  // 680px → tablet large
+                lg: "47.5rem",  // 760px → laptop
+                xl: "51.25rem", // 820px → desktop
+                "2xl": "56.25rem", // 900px → large monitors
+            }}
+        >
+            {/* Make Post Box */}
+            <Box
+                shadow="md"
+                w="100%"
+                minW="0"
+                borderRadius={{ base: "0.75rem", md: "1rem" }}
+            >
+                <MakePost
+                    onPost={() => {
+                        setLoading(true);
+                        setTimeout(fetchPosts, 200);
+                    }}
+                />
             </Box>
-            <Box px={5}>
-                {loading ? (
-                    <Spinner size="xl" color="blue.400"/>
-                ) : posts.length > 0 ? (
-                    posts.map((post: Post) => (
-                        <Box key={post.id}>
-                            <a href={`/app/profile/${post.user.handle}`} className="text-blue-400 hover:underline">
-                                <Heading size="2xl"
-                                         className="title">{post.user.name || "Loading..."}</Heading>
-                            </a>
-                            <Text className="text-gray-400">{post.user.handle || "Loading handle..."}</Text>
-                            <Markdown className="text-gray-300">{post.body}</Markdown>
-                            <Box className="bg-gray-800 p-3 rounded-lg">
-                                <Reply id={post.id}/>
-                                <Heading size="sm" className="text-gray-300">Replies</Heading>
-                                <Comments postId={post.id}/>
-                            </Box>
-                        </Box>
-                    ))
-                ) : (
-                    <Text className="text-gray-400">Nothing to see here folks</Text>
-                )}
-            </Box>
+
+            {/* Posts */}
+            {loading ? (
+                <Spinner alignSelf="center" size="xl" color="blue.400" />
+            ) : posts.length > 0 ? (
+                posts.map((post: Post) => (
+                    <Box
+                        key={post.id}
+                        w="100%"
+                        id={`${post.id}`}
+                    >
+                        <PostCard post={post} isComment={false}/>
+                    </Box>
+                ))
+            ) : (
+                <Text textAlign="center" color={colors.mutedText}>
+                    Nothing to see here folks
+                </Text>
+            )}
         </VStack>
     );
 }
-
 
 export default Feed;

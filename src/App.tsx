@@ -5,18 +5,20 @@ import ProfilePage from "./pages/ProfilePage";
 import "./syles/App.css";
 import LoginPage from "./pages/LoginPage.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
-import Setup from "./pages/Setup.tsx";
+import SetupPage from "./pages/SetupPage.tsx";
 
 function App() {
+
+
     return (
-        <Router basename="/app">
+        <Router>
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/feed" element={<FeedPage/>}/>
-                <Route path="/profile/:username" element={<ProfilePage/>}/>
-                <Route path="/setup" element={<Setup />} />
+                <Route path="/login" element={<LoginPage/>}/>
+                <Route path="/register" element={<SignupPage/>}/>
+                <Route path="/app/feed" element={<FeedPage/>}/>
+                <Route path="/app/profile/:username" element={<ProfilePage/>}/>
+                <Route path="/setup" element={<SetupPage/>}/>
             </Routes>
         </Router>
     );

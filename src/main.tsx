@@ -1,13 +1,16 @@
 import {createRoot} from "react-dom/client";
-import "./index.css";
+import "./syles/index.css";
 import App from "./App";
 import {Provider} from "./components/ui/provider.tsx";
+import {UserContextProvider} from "./context/userContext.tsx";
 
 // @ts-ignore
 createRoot(document.getElementById("root")).render(
     (
         <Provider>
-            <App/>
+            <UserContextProvider>
+                <App />
+            </UserContextProvider>
         </Provider>
     )
 );
