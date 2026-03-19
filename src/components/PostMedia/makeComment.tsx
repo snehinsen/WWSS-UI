@@ -67,21 +67,24 @@ function MakeComment({ id, isOpen, onCLoseEvent, onPostEvent }: Props) {
                             </Alert.Root>
                         )}
 
-                        <TipTapEditor onChange={handleBodyChange} />
+                        <Box w="100%" minW={0}>
+                            <TipTapEditor onChange={handleBodyChange} />
 
-                        <HStack mt={4} justify="flex-end" flexWrap="wrap" gap={2}>
-                            <Button colorScheme="red" variant="outline" onClick={handleCancel} flex="1 1 auto">
-                                Cancel
-                            </Button>
-                            <Button
-                                colorScheme="blue"
-                                onClick={handleComment}
-                                flex="1 1 auto"
-                                disabled={processing}
-                            >
-                                {processing ? <Spinner /> : "Comment"}
-                            </Button>
-                        </HStack>
+                            <HStack mt={4} justify="flex-end" flexWrap="wrap" gap={2}>
+                                {/* Prevent buttons from shrinking the editor width in tight layouts */}
+                                <Button colorScheme="red" variant="outline" onClick={handleCancel} flex="0 0 auto">
+                                    Cancel
+                                </Button>
+                                <Button
+                                    colorScheme="blue"
+                                    onClick={handleComment}
+                                    flex="0 0 auto"
+                                    disabled={processing}
+                                >
+                                    {processing ? <Spinner /> : "Comment"}
+                                </Button>
+                            </HStack>
+                        </Box>
                     </Box>
                 </Collapsible.Content>
             </Collapsible.Root>

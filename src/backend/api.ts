@@ -9,7 +9,7 @@ const api: AxiosInstance = axios.create({
 
 if (import.meta.env.DEV) {
     console.log("DEV");
-    api.defaults.headers.common['Authorization'] = 'Basic ' + btoa('admin@wwss.ai:password')
+    api.defaults.headers.common['Authorization'] = 'Basic ' + btoa('admin@wwss.ai:Password')
 }
 
 // User

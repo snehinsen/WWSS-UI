@@ -47,7 +47,7 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                 align="start"
                 w="100%">
                 {/* Avatar */}
-                <Avatar.Root size="2xl" alignSelf="start">
+                <Avatar.Root size={isComment ? "md" : "2xl"} alignSelf="start">
                     <Avatar.Image src={post.user.pfp} alt={`${post.user.firstName}'s avatar`}/>
                     <Avatar.Fallback>{`${post.user!!.firstName.charAt(0) + post.user!!.lastName.charAt(0)}`}</Avatar.Fallback>
                 </Avatar.Root>
@@ -55,8 +55,10 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                 {/* Post content */}
                 <VStack
                     align="start"
-                    w={{base: "100%", md: "calc(100% - 3rem)"}}
+                    flex="1"
+                    w="100%"
                     gap={0}
+                    minW={0}
                 >
                     <Link
                         href={`/app/profile/${post.user.handle}`}
@@ -131,12 +133,12 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                 minW={0}
                 px={0.5}
             >
-                <HStack gap={2} flexWrap="wrap">
-                    <Button flex="1 1 48%" variant="outline">
+                <HStack gap={2} flexWrap="wrap" minW={0}>
+                    <Button w={{base: "100%", md: "48%"}} variant="outline">
                         <BsHandThumbsUp/> Like
                     </Button>
                     <Button
-                        flex="1 1 48%"
+                        w={{base: "100%", md: "48%"}}
                         variant="outline"
                         onClick={() => setReplyOpen(!replyOpen)}
                     >
