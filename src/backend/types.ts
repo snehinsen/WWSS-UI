@@ -8,20 +8,26 @@ export interface User {
     "id": number,
     "isBot": boolean,
     "isWizarding": boolean,
-    "name": string,
+    "firstName": string,
+    "lastName": string,
     "pfp": string
 }
 
 export interface UserRegistration {
-    name: string,
+    firstName: string,
+    lastName: string,
     email: string,
     password: string,
 }
 
 // Single use types
-export interface UserHandle {
-    handle: string;
+export interface Notification {
+    id: number,
+    body: string,
+    timeSent: string,
+    title: string
 }
+
 
 // Post related types
 

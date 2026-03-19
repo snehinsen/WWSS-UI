@@ -70,10 +70,10 @@ const MentionList = forwardRef(({items, command, query}: Props, ref) => {
                         >
                             <Avatar.Root size="xs">
                                 <Avatar.Image src={item.pfp}/>
-                                <Avatar.Fallback>{item.name.charAt(0)}</Avatar.Fallback>
+                                <Avatar.Fallback>{item.firstName.charAt(0)}</Avatar.Fallback>
                             </Avatar.Root>
                             <VStack align="start" gap={0}>
-                                <Text fontWeight="bold">{highlightMatch(item.name)}</Text>
+                                <Text fontWeight="bold">{highlightMatch(item.firstName)}</Text>
                                 <Text fontSize="sm" color="gray.300">
                                     @{item.handle}
                                 </Text>

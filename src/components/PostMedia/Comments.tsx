@@ -9,20 +9,30 @@ import PostCard from "./Post.tsx";
 interface Props {
     postId: number;
     isComment?: boolean;
+    isLatest: boolean;
+    onSync: () => void;
 }
 
-function Comments({postId, isComment = false}: Props) {
+function Comments({postId, isComment = false, isLatest, onSync}: Props) {
     const theme = useThemeColors();
     const [replies, setReplies] = useState<Post[]>([]);
 
+    const fetchComments = async () => {
+        const comments: Post[] = await getPostComments(postId);
+        setReplies(comments);
+    };
+
     // Fetch comments on mount
     useEffect(() => {
-        const fetchComments = async () => {
-            const comments: Post[] = await getPostComments(postId);
-            setReplies(comments);
-        };
         fetchComments();
     }, [postId]);
+
+    useEffect(() => {
+        if (!isLatest) {
+            fetchComments();
+            onSync();
+        }
+    }, [isLatest]);
 
     if (replies.length === 0) {
         if (isComment === false) {
@@ -42,7 +52,14 @@ function Comments({postId, isComment = false}: Props) {
     return (
         <VStack gap={{base: 3, md: 4}} align="stretch" w="100%">
             {replies.map((comment: Post) => (
-                <PostCard post={comment} isComment />
+                <PostCard
+                    key={comment.id}
+                    post={comment}
+                    isComment
+                    onDeleteEvent={() => {
+                        setTimeout(fetchComments, 200);
+                    }}
+                />
             ))}
         </VStack>
     );

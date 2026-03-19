@@ -1,5 +1,5 @@
 import axios, {AxiosInstance, AxiosResponse} from "axios";
-import {Post, User, UserRegistration} from "./types.ts";
+import {Notification, Post, User, UserRegistration} from "./types.ts";
 
 
 const api: AxiosInstance = axios.create({
@@ -8,7 +8,8 @@ const api: AxiosInstance = axios.create({
 });
 
 if (import.meta.env.DEV) {
-    api.defaults.headers.common['Authorization']= 'Basic ' + btoa('admin@wwss.ai:password')
+    console.log("DEV");
+    api.defaults.headers.common['Authorization'] = 'Basic ' + btoa('admin@wwss.ai:password')
 }
 
 // User
@@ -55,13 +56,13 @@ export async function uploadProfilePicture(file: File): Promise<boolean> {
     formData.append("file", file);
     const response: AxiosResponse<boolean> = await api
         .post(
-            "/user/uploadPfp",
-            formData,
-            {
+            "/user/pfp",
+            formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
-            });
+            }
+        );
 
     return response.data;
 }
@@ -111,9 +112,11 @@ export async function getUserPosts(name: string) {
 
 export async function deletePost(id: number) {
     console.log("Deleting...");
-    await api.delete(
+    const res: AxiosResponse<boolean> = await api.delete(
         `/post/${id}`
     );
+
+    return res.data;
 }
 
 // comments
@@ -127,9 +130,12 @@ export async function getPostComments(id: number): Promise<Post[]> {
 }
 
 export async function comment(body: string, postId: number): Promise<boolean> {
-    return await api.post(
+    console.log("Posting...");
+    const res: AxiosResponse<boolean> = await api.post(
         "comment/" + postId + "?body=" + encodeURIComponent(body)
-    );
+    )
+    console.log(res)
+    return res.data
 }
 
 // friends
@@ -138,4 +144,30 @@ export async function addFriend(username: string): Promise<boolean> {
     return await api.post(
         "friends/add?username=" + username
     );
+}
+
+// Notification
+
+export async function getNotifications(): Promise<Notification[]> {
+    const res: AxiosResponse<Notification[]> = await api.get(
+        "notification"
+    );
+
+    return res.data;
+}
+
+export async function clearNotification(id: number): Promise<boolean> {
+    const res: AxiosResponse<boolean> = await api.get(
+        `notification/${id}`
+    );
+
+    return res.data;
+}
+
+export async function clearAll(): Promise<boolean> {
+    const res: AxiosResponse<boolean> = await api.get(
+        "notification"
+    );
+
+    return res.data;
 }

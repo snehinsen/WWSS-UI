@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Box, Button, Collapsible, HStack } from "@chakra-ui/react";
+import {Alert, Box, Button, Collapsible, HStack, Spinner} from "@chakra-ui/react";
 import { comment } from "../../backend/api.ts";
 import TipTapEditor from "../editor/Editor.tsx";
 import { useThemeColors } from "../ui/theme.ts";
@@ -15,6 +15,7 @@ function MakeComment({ id, isOpen, onCLoseEvent, onPostEvent }: Props) {
     const theme = useThemeColors();
     const [body, setBody] = useState("");
     const [success, setSuccess] = useState<boolean | null>(null);
+    const [processing, setProcessing] = useState<boolean>(false);
 
     const handleBodyChange = (value?: string) => setBody(value || "");
 
@@ -24,12 +25,18 @@ function MakeComment({ id, isOpen, onCLoseEvent, onPostEvent }: Props) {
     };
 
     const handleComment = async () => {
+        setProcessing(true)
         const state:boolean = await comment(body, id);
+        console.log(`State: ${state}`);
         setSuccess(state);
-        setBody("");
-        if (success) {
+        if (state) {
+            setBody("");
             onPostEvent();
-            onCLoseEvent();
+            setProcessing(false)
+        }
+       else {
+            setProcessing(false)
+            console.log("Used fail path")
         }
     };
 
@@ -66,8 +73,13 @@ function MakeComment({ id, isOpen, onCLoseEvent, onPostEvent }: Props) {
                             <Button colorScheme="red" variant="outline" onClick={handleCancel} flex="1 1 auto">
                                 Cancel
                             </Button>
-                            <Button colorScheme="blue" onClick={handleComment} flex="1 1 auto">
-                                Comment
+                            <Button
+                                colorScheme="blue"
+                                onClick={handleComment}
+                                flex="1 1 auto"
+                                disabled={processing}
+                            >
+                                {processing ? <Spinner /> : "Comment"}
                             </Button>
                         </HStack>
                     </Box>

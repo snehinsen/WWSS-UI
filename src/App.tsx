@@ -6,6 +6,7 @@ import "./syles/App.css";
 import LoginPage from "./pages/LoginPage.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
 import SetupPage from "./pages/SetupPage.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
                 <Route path="/app/feed" element={<FeedPage/>}/>
                 <Route path="/app/profile/:username" element={<ProfilePage/>}/>
                 <Route path="/setup" element={<SetupPage/>}/>
+                <Route path="/app/settings" element={<SettingsPage />}/>
             </Routes>
         </Router>
     );

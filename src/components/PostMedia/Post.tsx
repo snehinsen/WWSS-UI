@@ -1,22 +1,37 @@
-import {Avatar, Box, Button, Heading, HStack, Link, Spacer, Text, VStack} from "@chakra-ui/react";
+import {Avatar, Box, Button, Heading, HStack, IconButton, Link, Menu, Spacer, Text, VStack} from "@chakra-ui/react";
 import MakeComment from "./makeComment.tsx";
 import Comments from "./Comments.tsx";
 import "../../syles/feed.css";
 import {Post} from "../../backend/types.ts";
 import {useThemeColors} from "../ui/theme.ts";
 import {BsHandThumbsUp} from "react-icons/bs";
-import {BiComment} from "react-icons/bi";
+import {BiComment, BiTrash} from "react-icons/bi";
 import {useState} from "react";
 import {renderPostBody} from "./HTML2Chakra.tsx";
+import {MoreVertical} from "lucide-react";
+import {AiFillCopy} from "react-icons/ai";
+import {useUserContext} from "../../context/userContext.tsx";
+import {FaFlag} from "react-icons/fa";
+import {deletePost} from "../../backend/api.ts";
 
 interface Props {
     post: Post;
     isComment?: boolean;
+    onDeleteEvent: () => void;
 }
 
-function PostCard({post, isComment = false}: Props) {
+function PostCard({post, isComment = false, onDeleteEvent}: Props) {
     const theme = useThemeColors();
     const [replyOpen, setReplyOpen] = useState(false);
+
+    const {user} = useUserContext();
+
+    const [isSynced, setIsSynced] = useState<boolean>(true)
+
+    const onDelete = async (id: number) => {
+        await deletePost(id)
+        onDeleteEvent();
+    }
 
     return (
         <Box
@@ -33,8 +48,8 @@ function PostCard({post, isComment = false}: Props) {
                 w="100%">
                 {/* Avatar */}
                 <Avatar.Root size="2xl" alignSelf="start">
-                    <Avatar.Image src={post.user.pfp} alt={`${post.user.name}'s avatar`}/>
-                    <Avatar.Fallback>{post.user.name.charAt(0)}</Avatar.Fallback>
+                    <Avatar.Image src={post.user.pfp} alt={`${post.user.firstName}'s avatar`}/>
+                    <Avatar.Fallback>{`${post.user!!.firstName.charAt(0) + post.user!!.lastName.charAt(0)}`}</Avatar.Fallback>
                 </Avatar.Root>
 
                 {/* Post content */}
@@ -51,7 +66,7 @@ function PostCard({post, isComment = false}: Props) {
                             className="title"
                             py={0}
                         >
-                            {post.user.name || "Loading..."}
+                            {`${post.user!!.firstName} ${post.user!!.lastName}` || "Loading..."}
                         </Heading>
                     </Link>
                     <Text
@@ -61,6 +76,43 @@ function PostCard({post, isComment = false}: Props) {
                         @{post.user.handle || "Loading handle..."}
                     </Text>
                 </VStack>
+                <Spacer w="full"/>
+                <Menu.Root>
+                    <Menu.Trigger asChild>
+                        <IconButton variant="subtle">
+                            <MoreVertical/>
+                        </IconButton>
+                    </Menu.Trigger>
+                    <Menu.Positioner>
+                        <Menu.Content>
+                            <Menu.Item value="cplnk">
+                                <AiFillCopy/> Copy Link
+                            </Menu.Item>
+                            {/* Delete option for own posts only, flag for rest */}
+                            <Menu.Item
+                                value={post.user.handle === user?.handle ? "del" : "flag"}
+                                color="red"
+                                onClick={() => {
+                                    if (post.user.handle === user?.handle) {
+                                        onDelete(post.id)
+                                    } else {
+                                        console.error("Flagging logic not implemented yet")
+                                    }
+                                }}
+                            >
+                                {
+                                    post.user.handle === user?.handle ? (
+                                        <><BiTrash/> Delete</>
+                                    ) : (
+                                        <>
+                                            <FaFlag/> Flag Post
+                                        </>
+                                    )
+                                }
+                            </Menu.Item>
+                        </Menu.Content>
+                    </Menu.Positioner>
+                </Menu.Root>
             </HStack>
 
             <Box
@@ -70,7 +122,6 @@ function PostCard({post, isComment = false}: Props) {
                 {renderPostBody(post.body)}
             </Box>
 
-            {/* Action buttons + replies */}
             <Box
                 bg={theme.cardBg}
                 p={{base: 3, md: 4}}
@@ -96,9 +147,13 @@ function PostCard({post, isComment = false}: Props) {
                 <MakeComment
                     id={post.id}
                     isOpen={replyOpen}
-                    onCLoseEvent={() => setReplyOpen(false)}
+                    onCLoseEvent={() => {
+                        setReplyOpen(false)
+                        setIsSynced(false)
+                    }}
                     onPostEvent={() => {
-                        window.location.reload(); // Reload the page as a placeholder oporation till partal rerendering is implemented.
+                        setReplyOpen(false);
+                        setIsSynced(false);
                     }}
                 />
 
@@ -115,6 +170,12 @@ function PostCard({post, isComment = false}: Props) {
                 <Comments
                     postId={post.id}
                     isComment={isComment}
+                    isLatest={isSynced}
+                    onSync={
+                        () => {
+                            setIsSynced(true)
+                        }
+                    }
                 /> {/* In context of parent comment being the root post or a comment, check */}
             </Box>
         </Box>

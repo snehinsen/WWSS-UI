@@ -5,7 +5,7 @@ function SignupPage() {
 
     return (
         <>
-            <Header headerType="logged-in"/>
+            <Header headerType=""/>
             <Signup/>
         </>
     );

@@ -13,7 +13,7 @@ export function useThemeColors() {
         textSecondary: useColorModeValue("gray.600", "gray.400"),
 
         // UI elements
-        border: useColorModeValue("gray.200", "gray.700"),
+        border: useColorModeValue("gray.200", "gray.600"),
         hoverBg: useColorModeValue("gray.50", "gray.800"),
 
         // Buttons (static)

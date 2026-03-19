@@ -150,11 +150,11 @@ function UserProfile({name}: Props) {
                                 flexWrap="wrap"
                             >
                                 <Avatar.Root size={{base: "xl", md: "2xl"}}>
-                                    <Avatar.Image src={selectedUser.pfp} alt={selectedUser.name}/>
-                                    <Avatar.Fallback>{selectedUser.name.charAt(0)}</Avatar.Fallback>
+                                    <Avatar.Image src={selectedUser.pfp} alt={selectedUser.firstName}/>
+                                    <Avatar.Fallback>{selectedUser.firstName.charAt(0)}</Avatar.Fallback>
                                 </Avatar.Root>
                                 <VStack align="start" gap={1}>
-                                    <Heading className="title" size="4xl">{selectedUser.name}</Heading>
+                                    <Heading className="title" size="4xl">{selectedUser.firstName}</Heading>
                                     <Text color={theme.textSecondary}>@{selectedUser.handle}</Text>
                                     <Text color={theme.textPrimary}>{selectedUser.bio ?? "No bio set"}</Text>
                                 </VStack>
@@ -259,11 +259,11 @@ function UserProfile({name}: Props) {
                                                     cursor="pointer"
                                                 >
                                                     <Avatar.Root size="xl">
-                                                        <Avatar.Image src={f.pfp} alt={f.name}/>
-                                                        <Avatar.Fallback>{f.name}</Avatar.Fallback>
+                                                        <Avatar.Image src={f.pfp} alt={f.firstName}/>
+                                                        <Avatar.Fallback>{f.firstName}</Avatar.Fallback>
                                                     </Avatar.Root>
                                                     <Text fontWeight="600" color={theme.textPrimary}>
-                                                        {f.name}
+                                                        {f.firstName}
                                                     </Text>
                                                     <Text fontSize="sm" color={theme.textSecondary}>
                                                         @{f.handle}
@@ -274,7 +274,7 @@ function UserProfile({name}: Props) {
                                     ) : (
                                         <Box py={12} textAlign="center" bg={theme.hoverBg} borderRadius="lg">
                                             <Text color={theme.textSecondary}>
-                                                {selectedUser.name.split(" ")[0]} has no friends yet, and is OH so
+                                                {selectedUser.firstName.split(" ")[0]} has no friends yet, and is OH so
                                                 lonely 😭.
                                             </Text>
                                         </Box>

@@ -67,7 +67,6 @@ function Feed() {
             >
                 <MakePost
                     onPost={() => {
-                        setLoading(true);
                         setTimeout(fetchPosts, 200);
                     }}
                 />
@@ -83,7 +82,14 @@ function Feed() {
                         w="100%"
                         id={`${post.id}`}
                     >
-                        <PostCard post={post} isComment={false}/>
+                        <PostCard
+                            key={post.id}
+                            post={post}
+                            isComment={false}
+                            onDeleteEvent={() => {
+                                setTimeout(fetchPosts, 200);
+                            }}
+                        />
                     </Box>
                 ))
             ) : (

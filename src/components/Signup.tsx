@@ -21,14 +21,16 @@ import {useThemeColors} from "./ui/theme.ts";
 
 export default function Signup() {
 
-    const [name, setName] = useState("");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLaststName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const colors = useThemeColors();
     const handleSubmit = () => {
         const user: UserRegistration = {
-            name: name,
+            firstName: firstName,
+            lastName: lastName,
             email: email,
             password: password,
         }
@@ -51,56 +53,70 @@ export default function Signup() {
                     borderWidth="1px"
                     borderColor={colors.border}
                 >
-                    <Stack gap={6}>
-                        <Stack gap={1} textAlign="center">
-                            <Heading size="lg">Please sign un</Heading>
+                    <form>
+                        <Stack gap={6}>
+                            <Stack gap={1} textAlign="center">
+                                <Heading size="lg">Please sign un</Heading>
+                            </Stack>
+
+                            <Stack gap={4}>
+                                <HStack>
+                                    <Field.Root>
+                                        <Field.Label>First Name</Field.Label>
+                                        <Input
+                                            name="fname"
+                                            value={firstName}
+                                            onChange={(e) => setFirstName(e.target.value)}
+                                            required
+                                            autoFocus
+                                            placeholder="Your name"
+                                            type="text"/>
+                                    </Field.Root>
+                                    <Field.Root>
+                                        <Field.Label>Last Name</Field.Label>
+                                        <Input
+                                            name="lname"
+                                            value={lastName}
+                                            onChange={(e) => setLaststName(e.target.value)}
+                                            required
+                                            placeholder="Your name"
+                                            type="text"/>
+                                    </Field.Root>
+                                </HStack>
+
+                                <Field.Root>
+                                    <Field.Label>Email</Field.Label>
+                                    <Input
+                                        name="username"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        placeholder="Email"
+                                        type="email"
+                                    />
+                                </Field.Root>
+
+                                <Field.Root>
+                                    <Field.Label>Password</Field.Label>
+                                    <Input
+                                        name="password"
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        placeholder="Password"/>
+                                </Field.Root>
+
+                                <Button
+                                    colorScheme="blue"
+                                    size="lg"
+                                    onClick={handleSubmit}
+                                >
+                                    Sign up
+                                </Button>
+                            </Stack>
                         </Stack>
-
-                        <Stack gap={4}>
-                            <Field.Root>
-                                <Field.Label>Name</Field.Label>
-                                <Input
-                                    name="name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    required
-                                    autoFocus
-                                    placeholder="Your name"
-                                    type="text"/>
-                            </Field.Root>
-
-                            <Field.Root>
-                                <Field.Label>Email</Field.Label>
-                                <Input
-                                    name="username"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    autoFocus
-                                    placeholder="Email"
-                                    type="email"/>
-                            </Field.Root>
-
-                            <Field.Root>
-                                <Field.Label>Password</Field.Label>
-                                <Input
-                                    name="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    placeholder="Password"/>
-                            </Field.Root>
-
-                            <Button
-                                colorScheme="blue"
-                                size="lg"
-                                onClick={handleSubmit}
-                            >
-                                Sign up
-                            </Button>
-                        </Stack>
-                    </Stack>
+                    </form>
 
                     <HStack my={6} gap={4}>
                         <Separator flex="1"/>

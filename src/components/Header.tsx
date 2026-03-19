@@ -22,10 +22,9 @@ import {useThemeColors} from "./ui/theme.ts";
 import {LuMoon, LuSun} from "react-icons/lu";
 import {useColorMode} from "./ui/color-mode.tsx";
 import {useUserContext} from "../context/userContext";
-import {MessageCircle, MoreHorizontal} from "lucide-react";
+import {MoreHorizontal} from "lucide-react";
 import {FiSettings} from "react-icons/fi";
-import {FaBell} from "react-icons/fa6";
-import {MdFeed} from "react-icons/md";
+import Notifications from "./Notifications.tsx";
 
 interface Props {
     headerType: string;
@@ -96,12 +95,6 @@ function Header({headerType}: Props) {
                             </Link>
                         </Flex>
 
-                        {/* DESKTOP NAV */}
-                        <HStack gap={6} display={{base: "none", lg: "flex"}} justifyContent="center" alignItems="center">
-                            <Link href="/app/feed"><Text textStyle="2xl"><MdFeed /> Feed</Text></Link>
-                            <Link href="/app/dms"><Text textStyle="2xl"><MessageCircle /> Your DMs</Text></Link>
-                        </HStack>
-
                         {/* RIGHT SIDE */}
                         <HStack gap={3}>
                             <ClientOnly fallback={<Skeleton boxSize="8"/>}>
@@ -113,7 +106,7 @@ function Header({headerType}: Props) {
                                     {colorMode === "light" ? <LuSun/> : <LuMoon/>}
                                 </IconButton>
                             </ClientOnly>
-
+                            <Notifications/>
                             <Box>
                                 {!loading ? (
                                     <>
@@ -127,16 +120,15 @@ function Header({headerType}: Props) {
                                                     <Avatar.Root size="sm">
                                                         <Avatar.Image src={user?.pfp}/>
                                                         <Avatar.Fallback>
-                                                            {user?.name?.charAt(0)}
+                                                            {`${user!!.firstName.charAt(0) + user!!.lastName.charAt(0)}`}
                                                         </Avatar.Fallback>
                                                     </Avatar.Root>
                                                 </Box>
                                             </Menu.Trigger>
-
                                             <Portal>
                                                 <Menu.Positioner>
                                                     <Menu.Content p={4} minW="xs">
-                                                        <VStack align="start" gap={4}>
+                                                        <VStack align="start" gap={1}>
                                                             <Link
                                                                 href={`/app/profile/${user?.handle}`}
                                                                 w="100%"
@@ -150,13 +142,13 @@ function Header({headerType}: Props) {
                                                                     <Avatar.Root size="xl">
                                                                         <Avatar.Image src={user?.pfp}/>
                                                                         <Avatar.Fallback>
-                                                                            {user?.name?.charAt(0)}
+                                                                            {`${user!!.firstName.charAt(0) + user!!.lastName.charAt(0)}`}
                                                                         </Avatar.Fallback>
                                                                     </Avatar.Root>
 
                                                                     <VStack align="start" gap={0}>
                                                                         <Text fontWeight="bold">
-                                                                            {user?.name}
+                                                                            {user?.firstName}
                                                                         </Text>
                                                                         <Text color={colors.mutedText}>
                                                                             @{user?.handle}
@@ -165,14 +157,25 @@ function Header({headerType}: Props) {
                                                                 </HStack>
                                                             </Link>
 
-                                                            <Menu.Item value="settings">
-                                                                <FiSettings/> Settings
+                                                            <Menu.Item value="settings" asChild>
+                                                                <Link
+                                                                    href="/app/settings"
+                                                                    _hover={{
+                                                                        textDecoration: "none"
+                                                                    }}
+                                                                >
+                                                                    <FiSettings/> Settings
+                                                                </Link>
                                                             </Menu.Item>
-                                                            <Menu.Item value="notifications">
-                                                                <FaBell/> Notifications
-                                                            </Menu.Item>
-                                                            <Menu.Item value="logout">
-                                                                Logout
+                                                            <Menu.Item value="logout" asChild color="red">
+                                                                <Link
+                                                                    href="/logout"
+                                                                    _hover={{
+                                                                        textDecoration: "none"
+                                                                    }}
+                                                                >
+                                                                    Logout
+                                                                </Link>
                                                             </Menu.Item>
                                                         </VStack>
                                                     </Menu.Content>
@@ -224,13 +227,13 @@ function Header({headerType}: Props) {
                                                     <Avatar.Root>
                                                         <Avatar.Image src={user?.pfp}/>
                                                         <Avatar.Fallback>
-                                                            {user?.name?.charAt(0)}
+                                                            {user?.firstName?.charAt(0)}
                                                         </Avatar.Fallback>
                                                     </Avatar.Root>
 
                                                     <VStack align="start" gap={0}>
                                                         <Text fontWeight="bold">
-                                                            {user?.name}
+                                                            {user?.firstName}
                                                         </Text>
                                                         <Text color={colors.mutedText}>
                                                             @{user?.handle}
@@ -248,13 +251,17 @@ function Header({headerType}: Props) {
                                                     <Portal>
                                                         <Menu.Positioner>
                                                             <Menu.Content>
-                                                                <Menu.Item value="settings">
-                                                                    <FiSettings/> Settings
+                                                                <Menu.Item value="settings" asChild>
+                                                                    <Link
+                                                                        href="/app/settings"
+                                                                        _hover={{
+                                                                            textDecoration: "none"
+                                                                        }}
+                                                                    >
+                                                                        <FiSettings/> Settings
+                                                                    </Link>
                                                                 </Menu.Item>
-                                                                <Menu.Item value="notifications">
-                                                                    <FaBell/> Notifications
-                                                                </Menu.Item>
-                                                                <Menu.Item value="logout">
+                                                                <Menu.Item value="logout" color="red">
                                                                     Logout
                                                                 </Menu.Item>
                                                             </Menu.Content>

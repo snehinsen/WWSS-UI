@@ -36,7 +36,7 @@ function MakePost({ onPost }: Props) {
     };
 
     return (
-        <Box bg={theme.cardBg} w="100%" minW={0}>
+        <Box bg={theme.cardBg} w="100%" borderRadius="xl">
             <Collapsible.Root open={isOpen}>
                 <Collapsible.Trigger
                     onClick={handleToggle}
