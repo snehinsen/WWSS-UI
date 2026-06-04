@@ -151,10 +151,10 @@ function UserProfile({name}: Props) {
                             >
                                 <Avatar.Root size={{base: "xl", md: "2xl"}}>
                                     <Avatar.Image src={selectedUser.pfp} alt={selectedUser.firstName}/>
-                                    <Avatar.Fallback>{selectedUser.firstName.charAt(0)}</Avatar.Fallback>
+                                    <Avatar.Fallback>{selectedUser.firstName.charAt(0)}{selectedUser.lastName.charAt(0)}</Avatar.Fallback>
                                 </Avatar.Root>
                                 <VStack align="start" gap={1}>
-                                    <Heading className="title" size="4xl">{selectedUser.firstName}</Heading>
+                                    <Heading className="title" size="4xl">{selectedUser.firstName} {selectedUser.lastName}</Heading>
                                     <Text color={theme.textSecondary}>@{selectedUser.handle}</Text>
                                     <Text color={theme.textPrimary}>{selectedUser.bio ?? "No bio set"}</Text>
                                 </VStack>
@@ -260,10 +260,10 @@ function UserProfile({name}: Props) {
                                                 >
                                                     <Avatar.Root size="xl">
                                                         <Avatar.Image src={f.pfp} alt={f.firstName}/>
-                                                        <Avatar.Fallback>{f.firstName}</Avatar.Fallback>
+                                                        <Avatar.Fallback>{f.firstName.charAt(0)+f.lastName.charAt(0)}</Avatar.Fallback>
                                                     </Avatar.Root>
                                                     <Text fontWeight="600" color={theme.textPrimary}>
-                                                        {f.firstName}
+                                                        {f.firstName} {f.lastName}
                                                     </Text>
                                                     <Text fontSize="sm" color={theme.textSecondary}>
                                                         @{f.handle}

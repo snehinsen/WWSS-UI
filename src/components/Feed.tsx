@@ -28,6 +28,13 @@ function Feed() {
 
     useEffect(() => {
         fetchPosts();
+
+        const timer = setInterval(() => {
+            fetchPosts()
+        }, 2000)
+
+
+        return clearInterval(timer);
     }, []);
 
     return (
@@ -79,8 +86,12 @@ function Feed() {
                 posts.map((post: Post) => (
                     <Box
                         key={post.id}
-                        w="100%"
                         id={`${post.id}`}
+                        bg={colors.cardBg}
+                        w="100%"
+                        p={{base: 3, md: 4}}
+                        borderRadius={{base: "0.5rem", md: "0.75rem"}}
+                        boxShadow={`inset 3px 0 0 0 ${colors.border}`}
                     >
                         <PostCard
                             key={post.id}

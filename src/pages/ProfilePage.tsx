@@ -1,5 +1,5 @@
 import {useParams} from "react-router-dom";
-import UserProfile from "../components/UserProfile.tsx";
+import UserProfile from "../components/user/UserProfile.tsx";
 import Header from "../components/Header";
 
 function ProfilePage() {

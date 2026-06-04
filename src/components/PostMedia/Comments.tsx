@@ -50,7 +50,7 @@ function Comments({postId, isComment = false, isLatest, onSync}: Props) {
     }
 
     return (
-        <VStack gap={{base: 3, md: 4}} align="stretch" w="100%">
+        <VStack gap={{base: 3, md: 4}} align="stretch" w="100%" justify="start">
             {replies.map((comment: Post) => (
                 <PostCard
                     key={comment.id}

@@ -60,20 +60,7 @@ export default function TipTapEditor({onChange}: Props) {
         <RichTextEditor.Root editor={editor} borderWidth="1px" rounded="l2" autoFocus>
             <RichTextEditor.Toolbar>
                 <RichTextEditor.ControlGroup>
-                    <Control.H1/>
-                    <Control.H2/>
-                    <Control.H3/>
-                </RichTextEditor.ControlGroup>
-                <RichTextEditor.ControlGroup>
                     <Control.Bold/>
-                    <Control.Italic/>
-                    <Control.Underline/>
-                    <Control.Strikethrough/>
-                    <Control.Link/>
-                    <Control.Unlink/>
-                    <Control.OrderedList/>
-                    <Control.BulletList/>
-                    <Control.Blockquote/>
                 </RichTextEditor.ControlGroup>
 
                 <RichTextEditor.ControlGroup>

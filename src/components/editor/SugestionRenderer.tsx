@@ -1,9 +1,10 @@
-import { ReactRenderer } from "@tiptap/react";
+import {ReactRenderer} from "@tiptap/react";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
+import "../../syles/tooltip-dark.css";
 import MentionList from "./MentionList";
 
-export default function MentionSuggestion()  {
+export default function MentionSuggestion() {
     return () => {
         let component: ReactRenderer | null = null;
         let popup: any = null;
@@ -11,7 +12,7 @@ export default function MentionSuggestion()  {
         return {
             onStart: (props: any) => {
                 component = new ReactRenderer(MentionList, {
-                    props: { ...props },
+                    props: {...props},
                     editor: props.editor,
                 });
 
@@ -23,11 +24,12 @@ export default function MentionSuggestion()  {
                     interactive: true,
                     trigger: "manual",
                     placement: "bottom-start",
+                    theme: "blank",
                 });
             },
 
             onUpdate: (props: any) => {
-                component?.updateProps({ ...props });
+                component?.updateProps({...props});
                 popup[0].setProps({
                     getReferenceClientRect: props.clientRect,
                 });

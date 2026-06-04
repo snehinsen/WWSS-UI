@@ -7,7 +7,6 @@ export function useThemeColors() {
         cardBg: useColorModeValue("white", "gray.900"),
         mutedText: useColorModeValue("gray.500", "gray.400"),
 
-
         // Text
         textPrimary: useColorModeValue("black", "white"),
         textSecondary: useColorModeValue("gray.600", "gray.400"),

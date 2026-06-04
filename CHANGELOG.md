@@ -1,17 +1,16 @@
-*March 6th, 2026*
+6*March 6th, 2026*
 # Changle log
 
 ## Features Added
 
-1. Comments and posts
-2. Login/signup/configuration flow (in progress)
+1. youtube embeddings
+2. DM threads (Group chats AND DMs)
+3. Live chats
+4. Friends system almost completely working
+5. User accounts have a badge if they are a bot to indicate that a profile is AI.
 
 ## Refactors
-1. Ported all post related content from Markdown to HTML
-
-   Using Chakra Rich Text Editor component
-
-   @mentions are now supported and formatted correctly (with suggestions tooltip)
+1. Some UI layouts have been moved into separate files, and handlers added.
 
 ## Removed
-1. Markdown formatting and support is fully removed. Its use case has become obsolete
+Nothing has been notibly removed in this update.

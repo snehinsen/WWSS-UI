@@ -23,6 +23,25 @@ export function renderPostBody(html: string) {
                     </Link>
                 );
             }
+            // Stander link
+            if (name === "a" && attribs?.href) {
+                return (
+                    <Link
+                        href={attribs.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="blue.500"
+                        _hover={{
+                            textDecoration: "none",
+                            borderBottom: "3px solid",
+                            borderColor: "blue.500",
+                        }}
+                    >
+                        {domToReact(children as DOMNode[], options)}
+                    </Link>
+                );
+            }
+
 
             // Paragraph
             if (name === "p") {

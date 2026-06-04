@@ -43,7 +43,8 @@ export function UserContextProvider({ children }: Props): ReactElement {
     }, []);
 
     useEffect(() => {
-        fetchUser().finally(() => setLoading(false));
+        fetchUser()
+            .finally(() => setLoading(false));
     }, [fetchUser]);
 
     return (

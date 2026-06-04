@@ -7,6 +7,8 @@ import LoginPage from "./pages/LoginPage.tsx";
 import SignupPage from "./pages/SignupPage.tsx";
 import SetupPage from "./pages/SetupPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
+import FriendsPage from "./pages/FriendsPage.tsx";
+import DMsPage from "./pages/DMsPage.tsx";
 
 function App() {
 
@@ -19,8 +21,10 @@ function App() {
                 <Route path="/register" element={<SignupPage/>}/>
                 <Route path="/app/feed" element={<FeedPage/>}/>
                 <Route path="/app/profile/:username" element={<ProfilePage/>}/>
-                <Route path="/setup" element={<SetupPage/>}/>
                 <Route path="/app/settings" element={<SettingsPage />}/>
+                <Route path="/app/friends" element={<FriendsPage />}/>
+                <Route path="/app/dms" element={<DMsPage />}/>
+                <Route path="/setup" element={<SetupPage/>}/>
             </Routes>
         </Router>
     );

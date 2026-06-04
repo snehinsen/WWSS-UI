@@ -23,7 +23,7 @@ import {useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {BiAt, BiError, BiUpload, BiWebcam} from "react-icons/bi";
 import {CgClose} from "react-icons/cg";
-import {checkHandle, update, uploadProfilePicture} from "../backend/api";
+import {checkHandle, configure, uploadProfilePicture} from "../backend/api";
 import {useThemeColors} from "./ui/theme.ts";
 
 export default function Setup() {
@@ -64,7 +64,7 @@ export default function Setup() {
             setCanSubmit(false);
         } else {
             setCanSubmit(true);
-            update(handle, bloodType);
+            configure(handle, bloodType);
             window.location.href = "/app/feed";
         }
     }
@@ -289,7 +289,10 @@ export default function Setup() {
                                 </Select.Root>
                             </Field.Root>
 
-                            <Button colorScheme="blue" size="lg" onClick={handleSubmit}>
+                            <Button
+                                colorPalette="blue"
+                                size="lg"
+                                onClick={handleSubmit}>
                                 Finish setup
                             </Button>
                         </Stack>

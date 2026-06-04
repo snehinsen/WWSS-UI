@@ -75,7 +75,7 @@ function Login() {
 
                             <Button
                                 type="submit"
-                                colorScheme="blue"
+                                colorPalette="blue"
                                 size="lg"
                             >
                                 Sign in

@@ -25,9 +25,19 @@ import {useUserContext} from "../context/userContext";
 import {MoreHorizontal} from "lucide-react";
 import {FiSettings} from "react-icons/fi";
 import Notifications from "./Notifications.tsx";
+import {BsPerson} from "react-icons/bs";
+import {BiHome} from "react-icons/bi";
+import {IconType} from "react-icons";
+import {FaMessage} from "react-icons/fa6";
 
 interface Props {
     headerType: string;
+}
+
+interface NavItem {
+    name: string;
+    path: string;
+    icon: IconType;
 }
 
 function Header({headerType}: Props) {
@@ -35,6 +45,23 @@ function Header({headerType}: Props) {
     const colors = useThemeColors();
     const {user, loading} = useUserContext();
     const {toggleColorMode, colorMode} = useColorMode();
+    const pages: NavItem[] = [
+        {
+            name: "Home",
+            path: "/app/feed",
+            icon: BiHome
+        },
+        {
+            name: "Friends",
+            path: "/app/friends",
+            icon: BsPerson
+        },
+        {
+            name: "Your DMs",
+            path: "/app/dms",
+            icon: FaMessage
+        }
+    ]
 
     const isDesktop = useBreakpointValue({base: false, lg: true});
 
@@ -64,7 +91,7 @@ function Header({headerType}: Props) {
         >
             {headerType === "landing" ? (
                 <Flex align="center" justify="space-between">
-                    <Link href="/app/feed">
+                    <Link href="/">
                         <Heading size="5xl" className="title">
                             WWSS
                         </Heading>
@@ -94,6 +121,27 @@ function Header({headerType}: Props) {
                                 </Heading>
                             </Link>
                         </Flex>
+
+                        {/* CENTER */}
+
+                        <HStack display={{base: "none", lg: "flex"}} gap={6}>
+                            {
+                                pages.map((page) => (
+                                        <Link
+                                            key={page.name}
+                                            href={page.path}
+                                            display="flex">
+                                            <page.icon size={31}/>
+                                            <Text fontSize="2xl">{page.name}</Text>
+
+                                        </Link>
+                                    )
+                                )
+
+                            }
+
+
+                        </HStack>
 
                         {/* RIGHT SIDE */}
                         <HStack gap={3}>
@@ -148,7 +196,7 @@ function Header({headerType}: Props) {
 
                                                                     <VStack align="start" gap={0}>
                                                                         <Text fontWeight="bold">
-                                                                            {user?.firstName}
+                                                                            {user?.firstName} {user?.lastName}
                                                                         </Text>
                                                                         <Text color={colors.mutedText}>
                                                                             @{user?.handle}
@@ -214,26 +262,29 @@ function Header({headerType}: Props) {
                                         <Text fontWeight="bold">Menu</Text>
 
                                         <VStack align="start" gap={3}>
-                                            <Link href="/app/feed" onClick={toggleSidebar}>
-                                                Feed
-                                            </Link>
 
-                                            <Link href="/app/dms" onClick={toggleSidebar}>
-                                                Your DMs
-                                            </Link>
+
+                                            {pages.map((page) => (
+                                                <Link href={page.path} onClick={toggleSidebar}>
+                                                    <page.icon size={20}/>
+                                                    <Text fontSize="xl">
+                                                        {page.name}
+                                                    </Text>
+                                                </Link>
+                                            ))}
 
                                             <HStack align="center" gap={3}>
                                                 <Link href={`/app/profile/${user?.handle}`} onClick={toggleSidebar}>
                                                     <Avatar.Root>
                                                         <Avatar.Image src={user?.pfp}/>
                                                         <Avatar.Fallback>
-                                                            {user?.firstName?.charAt(0)}
+                                                            {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                                                         </Avatar.Fallback>
                                                     </Avatar.Root>
 
                                                     <VStack align="start" gap={0}>
                                                         <Text fontWeight="bold">
-                                                            {user?.firstName}
+                                                            {user?.firstName} {user?.lastName}
                                                         </Text>
                                                         <Text color={colors.mutedText}>
                                                             @{user?.handle}

@@ -71,11 +71,11 @@ function MakePost({ onPost }: Props) {
                         <TipTapEditor onChange={setBody} />
 
                         <HStack gap={2} justify="flex-end">
-                            <Button colorScheme="green" onClick={handlePost}>
-                                Post
-                            </Button>
-                            <Button colorScheme="gray" onClick={handleCancel}>
+                            <Button variant="outline" onClick={handleCancel}>
                                 Cancel
+                            </Button>
+                            <Button colorPalette="green" onClick={handlePost}>
+                                Post
                             </Button>
                         </HStack>
                     </VStack>

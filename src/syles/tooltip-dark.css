@@ -1,0 +1,19 @@
+.tippy-box[data-theme~='blank'] {
+    background: transparent;
+    color: inherit;
+    box-shadow: none;
+    border: none;
+}
+
+.tippy-box[data-theme~='blank'] > .tippy-content {
+    padding: 0;
+}
+
+.tippy-box[data-theme~='blank'] > .tippy-arrow,
+.tippy-box[data-theme~='blank'] > .tippy-svg-arrow {
+    display: none;
+}
+
+.tippy-box[data-theme~='blank'] > .tippy-backdrop {
+    background: transparent;
+}
