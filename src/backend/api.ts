@@ -1,6 +1,13 @@
 import axios, {AxiosInstance, AxiosResponse} from "axios";
 import {
-    FriendRequest, Notification, Post, Thread, ThreadMemberUpdate, TypingIndicator, User, UserRegistration,
+    FriendRequest,
+    Notification,
+    Post,
+    Thread,
+    ThreadMemberUpdate,
+    TypingIndicator,
+    User,
+    UserRegistration,
     WebSocketMessageRequest,
     WebSocketMessageResponse
 } from "./types.ts";
@@ -82,7 +89,7 @@ export async function declineFriendRequests(requestID: number): Promise<boolean>
 }
 
 export async function removeFriend(handle: string): Promise<boolean> {
-    const response: AxiosResponse<boolean> = await api.get(`/friends/rm?handle=${handle}`);
+    const response: AxiosResponse<boolean> = await api.delete(`/friends/rm?handle=${handle}`);
     return response.data;
 }
 
@@ -202,7 +209,6 @@ export async function comment(body: string, postId: number): Promise<boolean> {
 // friends
 
 
-
 // Notification
 
 export async function getNotifications(): Promise<Notification[]> {
@@ -238,6 +244,27 @@ export async function createThread(request: { tittle: string; handles: string[] 
 
 export async function listThreads(): Promise<Thread[]> {
     const response: AxiosResponse<Thread[]> = await api.get("/dms");
+    return response.data;
+}
+
+export async function addMembers(tid: number, handles: string[]): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await api.post(`/dms/add?threadId=${tid}`, handles);
+    return response.data;
+}
+
+
+export async function removeMember(tid: number, uid: number): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await api.delete(`/dms/rm?threadId=${tid}&userId=${uid}`);
+    return response.data;
+}
+
+export async function leaveThread(tid: number): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await api.delete(`/dms/leave?threadId=${tid}`);
+    return response.data;
+}
+
+export async function deleteThread(tid: number): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await api.delete(`/dms/${tid}`);
     return response.data;
 }
 
@@ -429,7 +456,6 @@ export function sendTypingIndicator(
         })
     });
 }
-
 
 
 export async function getLiveThreadContent(

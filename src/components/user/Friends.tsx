@@ -28,7 +28,7 @@ function Friends() {
         try {
             const requests: FriendRequest[] = await getFriendRequests();
             const currentUser = await getUser();
-            
+
             setFriendRequests(requests || []);
             setFriends(currentUser?.friends || []);
 
@@ -100,7 +100,7 @@ function Friends() {
                             Friend Requests ({friendRequests.length})
                         </Heading>
 
-                        {friendRequests.length > 0 ? (
+                        {friendRequests.length > 0 && (
                             <VStack gap={3} align="stretch">
                                 {friendRequests.map((request: FriendRequest) => (
                                     <FriendCard
@@ -116,10 +116,7 @@ function Friends() {
                                     />
                                 ))}
                             </VStack>
-                        ) : (
-                            <Text>No requests</Text>
                         )}
-
                     </Box>
 
                     <Box

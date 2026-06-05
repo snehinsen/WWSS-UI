@@ -12,6 +12,7 @@ import {
     HStack,
     IconButton,
     Input,
+    Menu,
     Portal,
     Select,
     Spinner,
@@ -28,12 +29,16 @@ import "../../syles/feed.css";
 import {Thread, ThreadType, User, WebSocketMessageResponse,} from "../../backend/types.ts";
 
 import {
+    addMembers,
     connectToChat,
     createThread,
+    deleteThread,
     disconnectFromChat,
     getLiveThreadContent,
+    leaveThread,
     listThreads,
     onMessage,
+    removeMember,
     sendMessage,
 } from "../../backend/api.ts";
 
@@ -42,6 +47,7 @@ import {useUserContext} from "../../context/userContext.tsx";
 import {BiChevronRight, BiGroup, BiPlus, BiSend, BiUserPlus, BiX,} from "react-icons/bi";
 
 import {useThemeColors} from "../ui/theme.ts";
+import {MoreVertical} from "lucide-react";
 
 const smooth = "cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -151,7 +157,7 @@ function DMs() {
             // Find and auto-select the newly created thread
             const newThreads = await listThreads();
             const newThread = newThreads.find(t => !previousThreadIds.has(t.id));
-            
+
             if (newThread) {
                 setSelectedChat(newThread.id);
             }
@@ -165,6 +171,24 @@ function DMs() {
             setIsCreationProcessing(false);
         }
     };
+
+    const onRemoveMember = async (mid: number) => {
+        const result = await removeMember(selectedThread!.id, mid);
+        if (result) {
+            await fetchThreads();
+        } else {
+            alert("Failed to remove member");
+        }
+    }
+
+    const onLeaveChat = async (chatId: number) => {
+        const result = await leaveThread(chatId);
+        if (result) {
+            await fetchThreads();
+        } else {
+            alert("Failed to leave chat.");
+        }
+    }
 
     const handleSendMessage = () => {
 
@@ -280,428 +304,521 @@ function DMs() {
                         </HStack>
 
                         {/* MAIN LAYOUT */}
-                        <HStack align="start" gap={4} w="100%" h="75vh">
+                        <HStack align="strart" justify={threads.length > 0 ? "" : "center"} gap={4} w="100%" h="75vh">
+                            {threads.length > 0 ? (
+                                <>
+                                    {/* THREAD LIST - Hidden on mobile when chat is selected */}
+                                    {
+                                        (!isMobile || !selectedChat) && (
+                                            <VStack
+                                                w={isMobile ? "100%" : "20%"}
+                                                transition={`all 320ms ${smooth}`}
+                                                align="stretch"
+                                            >
+                                                <VStack
+                                                    align="stretch"
+                                                    gap={2}
+                                                    overflowY="auto"
+                                                >
 
-                            {/* THREAD LIST - Hidden on mobile when chat is selected */}
-                            {(!isMobile || !selectedChat) && (
-                                <VStack
-                                    w={isMobile ? "100%" : "20%"}
-                                    transition={`all 320ms ${smooth}`}
-                                    align="stretch"
-                                >
-                                    <Heading size="lg">Chats</Heading>
+                                                    {threads.map((thread: Thread) => {
 
-                                    <VStack align="stretch" gap={2} overflowY="auto">
+                                                        const isSelected = selectedChat === thread.id;
 
-                                        {threads.map((thread: Thread) => {
+                                                        const isDM = thread.threadType === ThreadType.DM;
 
-                                            const isSelected = selectedChat === thread.id;
+                                                        const ownerIsCurrentUser =
+                                                            thread.owner.handle === user?.handle;
 
-                                            const isDM = thread.threadType === ThreadType.DM;
+                                                        const other =
+                                                            thread.otherMembers?.find(
+                                                                (m: User) => m.handle !== user?.handle
+                                                            ) ?? null;
 
-                                            const ownerIsCurrentUser =
-                                                thread.owner.handle === user?.handle;
+                                                        /*
+                                                            DM Logic:
 
-                                            const other =
-                                                thread.otherMembers?.find(
-                                                    (m: User) => m.handle !== user?.handle
-                                                ) ?? null;
+                                                            If current user OWNS the DM:
+                                                                show OTHER user
 
-                                            /*
-                                                DM Logic:
+                                                            Otherwise:
+                                                                show OWNER
+                                                        */
+                                                        const displayUser =
+                                                            isDM && ownerIsCurrentUser
+                                                                ? other
+                                                                : thread.owner;
 
-                                                If current user OWNS the DM:
-                                                    show OTHER user
+                                                        return (
+                                                            <Box
+                                                                key={thread.id}
+                                                                p={3}
+                                                                borderWidth="1px"
+                                                                borderRadius="lg"
+                                                                cursor="pointer"
+                                                                bg={isSelected ? theme.cardBg : theme.bgPage}
+                                                                borderColor={isSelected ? "blue.400" : undefined}
+                                                                transition={`all 200ms ${smooth}`}
+                                                                position="relative"
+                                                                _hover={{transform: "translateY(-2px)"}}
+                                                                onClick={() =>
+                                                                    setSelectedChat(prev =>
+                                                                        prev === thread.id ? prev : thread.id
+                                                                    )
+                                                                }
+                                                            >
 
-                                                Otherwise:
-                                                    show OWNER
-                                            */
-                                            const displayUser =
-                                                isDM && ownerIsCurrentUser
-                                                    ? other
-                                                    : thread.owner;
+                                                                {/* ACTIVE BAR */}
+                                                                <Box
+                                                                    position="absolute"
+                                                                    left="0"
+                                                                    top="0"
+                                                                    w="3px"
+                                                                    h="100%"
+                                                                    bg="blue.400"
+                                                                    opacity={isSelected ? 1 : 0}
+                                                                    transition={`all 200ms ${smooth}`}
+                                                                />
 
-                                            console.log(`For chat with ID: ${thread.id}`);
-                                            console.log(thread.otherMembers?.length ?? 0);
-                                            console.log(thread.owner.handle);
-                                            console.log(`Owner: ${thread.owner.handle}, Current User: ${user?.handle}`);
-                                            console.log(thread.otherMembers);
+                                                                <HStack gap={3}>
 
-                                            return (
+                                                                    {/* AVATAR */}
+                                                                    <Flex
+                                                                        boxSize="38px"
+                                                                        align="center"
+                                                                        justify="center"
+                                                                    >
+                                                                        {thread.threadType === ThreadType.GC ? (
+                                                                            <BiGroup/>
+                                                                        ) : (
+                                                                            <Avatar.Root size="sm">
+                                                                                <Avatar.Fallback>
+                                                                                    {`${displayUser?.firstName?.[0] ?? ""}${displayUser?.lastName?.[0] ?? ""}`}
+                                                                                </Avatar.Fallback>
+
+                                                                                <Avatar.Image src={displayUser?.pfp}/>
+                                                                            </Avatar.Root>
+                                                                        )}
+                                                                    </Flex>
+
+                                                                    {/* TEXT */}
+                                                                    <VStack align="start" gap={0} flex={1}>
+
+                                                                        <Text fontWeight="semibold" fontSize="sm">
+                                                                            {thread.threadType === ThreadType.GC
+                                                                                ? thread.title
+                                                                                : `${displayUser?.firstName ?? ""} ${displayUser?.lastName ?? ""}`.trim()}
+                                                                        </Text>
+
+                                                                        <Text fontSize="xs" opacity={0.6}>
+                                                                            {thread.threadType === ThreadType.GC
+                                                                                ? `Group Chat · ${(thread.otherMembers?.length ?? 0) + 1}`
+                                                                                : `@${displayUser?.handle ?? "unknown"}`}
+                                                                        </Text>
+
+                                                                    </VStack>
+
+                                                                    <Menu.Root>
+                                                                        <Menu.Trigger asChild>
+                                                                            <IconButton variant="ghost">
+                                                                                <MoreVertical size={18}/>
+                                                                            </IconButton>
+                                                                        </Menu.Trigger>
+                                                                        <Portal>
+                                                                            <Menu.Positioner>
+                                                                                <Menu.Content>
+                                                                                    <Menu.Item
+                                                                                        value="delete"
+                                                                                        color="red"
+                                                                                        onClick={() => {
+                                                                                            if (ownerIsCurrentUser && !isDM) {
+                                                                                                deleteThread(thread.id)
+                                                                                                    .then(fetchThreads)
+                                                                                            } else if (isDM) {
+                                                                                                deleteThread(thread.id).then(fetchThreads)
+                                                                                            } else {
+                                                                                                onLeaveChat(thread.id).then(fetchThreads)
+                                                                                            }
+                                                                                        }}
+                                                                                    >
+                                                                                        {ownerIsCurrentUser && !isDM ?
+                                                                                            "Delete chat"
+                                                                                            : isDM ?
+                                                                                                "Close DM" : "Leave chat"
+                                                                                        }
+                                                                                    </Menu.Item>
+                                                                                </Menu.Content>
+                                                                            </Menu.Positioner>
+                                                                        </Portal>
+                                                                    </Menu.Root>
+
+                                                                </HStack>
+                                                            </Box>
+                                                        )
+                                                            ;
+                                                    })}
+
+                                                </VStack>
+                                            </VStack>
+                                        )}
+
+                                    {/* CHAT PANEL - Show on desktop always when thread exists, on mobile when selected */}
+                                    {selectedThread && (isMobile ? selectedChat !== 0 : true) && (
+                                        <VStack
+                                            w={isMobile ? "100%" : selectedThread?.threadType === ThreadType.GC && isSidebarOpen ? "65%" : "80%"}
+                                            h="100%"
+                                            align="stretch"
+                                            borderWidth="1px"
+                                            borderRadius="2xl"
+                                            overflow="hidden"
+                                            bg={theme.bgPage}
+                                            transition={`all 320ms ${smooth}`}
+                                        >
+
+                                            {/* HEADER */}
+                                            <HStack
+                                                px={4}
+                                                py={3}
+                                                borderBottomWidth="1px"
+                                                bg={theme.cardBg}
+                                                justify="space-between"
+                                            >
+                                                <HStack gap={3} flex={1}>
+                                                    {isMobile && (
+                                                        <IconButton
+                                                            variant="ghost"
+                                                            onClick={() => setSelectedChat(0)}
+                                                            size="sm"
+                                                        >
+                                                            <BiChevronRight
+                                                                transform="rotate(180deg)"/>
+                                                        </IconButton>
+                                                    )}
+                                                    <Heading size="md">
+                                                        {chatHeading}
+                                                    </Heading>
+                                                </HStack>
+
+                                                {selectedThread?.threadType === ThreadType.GC && (
+                                                    <HStack gap={2}>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => setIsAddMemberDialogOpen(true)}
+                                                        >
+                                                            <BiUserPlus/>
+                                                        </Button>
+                                                        {!isMobile && (
+                                                            <IconButton
+                                                                variant="ghost"
+                                                                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                                                                size="sm"
+                                                            >
+                                                                <BiGroup/>
+                                                            </IconButton>
+                                                        )}
+                                                    </HStack>
+                                                )}
+                                            </HStack>
+
+                                            {/* MESSAGES */}
+                                            <VStack
+                                                flex={1}
+                                                overflowY="auto"
+                                                align="stretch"
+                                                p={4}
+                                                gap={3}
+                                                w="full"
+                                            >
+
+                                                {messages.length === 0 ? (
+                                                    <VStack flex={1} justify="center">
+                                                        <Text opacity={0.6}>
+                                                            No messages yet
+                                                        </Text>
+                                                    </VStack>
+                                                ) : (
+                                                    messages.map((message) => {
+                                                        const isSelf = message.senderHandle === user?.handle;
+
+                                                        // Get sender's avatar from thread members
+                                                        let senderAvatar = null;
+                                                        if (selectedThread?.owner?.handle === message.senderHandle) {
+                                                            senderAvatar = selectedThread.owner.pfp;
+                                                        } else if (selectedThread?.otherMembers) {
+                                                            const sender = selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle);
+                                                            senderAvatar = sender?.pfp;
+                                                        }
+
+                                                        return (
+                                                            <Flex
+                                                                key={message.id}
+                                                                justify={isSelf ? "flex-end" : "flex-start"}
+                                                            >
+
+                                                                {/* AVATAR - Always on left */}
+                                                                <Avatar.Root size="sm">
+                                                                    <Avatar.Fallback>
+                                                                        {message.senderHandle?.[0]?.toUpperCase()}
+                                                                    </Avatar.Fallback>
+                                                                    {senderAvatar &&
+                                                                        <Avatar.Image
+                                                                            src={senderAvatar}/>}
+                                                                </Avatar.Root>
+
+                                                                {/* MESSAGE BUBBLE */}
+                                                                <Box
+                                                                    px={4}
+                                                                    py={3}
+                                                                    borderRadius="2xl"
+                                                                    bg={isSelf ? "blue.500" : theme.cardBg}
+                                                                    color={isSelf ? "white" : undefined}
+                                                                >
+
+                                                                    {/* SENDER INFO - Only show for other users */}
+                                                                    {!isSelf && (
+                                                                        <VStack
+                                                                            align="start"
+                                                                            gap={0} mb={2}>
+                                                                            <Text
+                                                                                fontSize="sm"
+                                                                                fontWeight="bold"
+                                                                            >
+                                                                                {/* Get sender's display name */}
+                                                                                {selectedThread?.owner?.handle === message.senderHandle
+                                                                                    ? `${selectedThread.owner.firstName ?? ""} ${selectedThread.owner.lastName ?? ""}`.trim()
+                                                                                    : selectedThread?.otherMembers?.find((m: User) => m.handle === message.senderHandle)
+                                                                                        ? `${selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle)?.firstName ?? ""} ${selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle)?.lastName ?? ""}`.trim()
+                                                                                        : message.senderHandle
+                                                                                }
+                                                                            </Text>
+                                                                            <Text
+                                                                                fontSize="xs"
+                                                                                opacity={0.7}
+                                                                            >
+                                                                                @{message.senderHandle}
+                                                                            </Text>
+                                                                        </VStack>
+                                                                    )}
+
+                                                                    {/* MESSAGE CONTENT */}
+                                                                    <Text
+                                                                        whiteSpace="pre-wrap"
+                                                                        mb={1}>
+                                                                        {message.content}
+                                                                    </Text>
+
+                                                                    {/* TIMESTAMP */}
+                                                                    <Text
+                                                                        fontSize="10px"
+                                                                        opacity={0.6}
+                                                                        textAlign={isSelf ? "right" : "left"}
+                                                                    >
+                                                                        {new Date(message.timestamp).toLocaleTimeString([], {
+                                                                            hour: "2-digit",
+                                                                            minute: "2-digit"
+                                                                        })}
+                                                                    </Text>
+
+                                                                </Box>
+
+
+                                                            </Flex>
+                                                        );
+                                                    })
+                                                )}
+
+                                            </VStack>
+
+                                            {/* INPUT */}
+                                            <HStack p={4} borderTopWidth="1px">
+
+                                                <Textarea
+                                                    value={messageInput}
+                                                    onChange={(e) => setMessageInput(e.target.value)}
+                                                    placeholder="Message..."
+                                                    resize="none"
+                                                    onKeyDown={(e) => {
+
+                                                        if (e.key === "Enter" && !e.shiftKey) {
+                                                            e.preventDefault();
+                                                            handleSendMessage();
+                                                        }
+                                                    }}
+                                                />
+
+                                                <Button
+                                                    colorPalette="blue"
+                                                    onClick={handleSendMessage}
+                                                >
+                                                    <BiSend/>
+                                                </Button>
+
+                                            </HStack>
+
+                                        </VStack>
+                                    )}
+
+                                    {/* MEMBERS SIDEBAR - Desktop only, Group Chats only */}
+                                    {!isMobile && selectedThread?.threadType === ThreadType.GC && isSidebarOpen && (
+                                        <VStack
+                                            w="35%"
+                                            h="100%"
+                                            align="stretch"
+                                            borderWidth="1px"
+                                            borderRadius="2xl"
+                                            overflow="hidden"
+                                            bg={theme.bgPage}
+                                            transition={`all 320ms ${smooth}`}
+                                        >
+                                            {/* SIDEBAR HEADER */}
+                                            <HStack
+                                                px={4}
+                                                py={3}
+                                                borderBottomWidth="1px"
+                                                bg={theme.cardBg}
+                                                justify="space-between"
+                                            >
+                                                <Heading size="md">Members</Heading>
+                                                <IconButton
+                                                    variant="ghost"
+                                                    onClick={() => setIsSidebarOpen(false)}
+                                                    size="sm"
+                                                >
+                                                    <BiX/>
+                                                </IconButton>
+                                            </HStack>
+
+                                            {/* MEMBERS LIST */}
+                                            <VStack
+                                                flex={1}
+                                                overflowY="auto"
+                                                align="stretch"
+                                                p={4}
+                                                gap={3}
+                                            >
+                                                {/* OWNER */}
                                                 <Box
-                                                    key={thread.id}
                                                     p={3}
                                                     borderWidth="1px"
                                                     borderRadius="lg"
-                                                    cursor="pointer"
-                                                    bg={isSelected ? theme.cardBg : theme.bgPage}
-                                                    borderColor={isSelected ? "blue.400" : undefined}
-                                                    transition={`all 200ms ${smooth}`}
-                                                    position="relative"
-                                                    _hover={{transform: "translateY(-2px)"}}
-                                                    onClick={() =>
-                                                        setSelectedChat(prev =>
-                                                            prev === thread.id ? prev : thread.id
-                                                        )
-                                                    }
+                                                    bg={theme.cardBg}
                                                 >
-
-                                                    {/* ACTIVE BAR */}
-                                                    <Box
-                                                        position="absolute"
-                                                        left="0"
-                                                        top="0"
-                                                        w="3px"
-                                                        h="100%"
-                                                        bg="blue.400"
-                                                        opacity={isSelected ? 1 : 0}
-                                                        transition={`all 200ms ${smooth}`}
-                                                    />
-
-                                                    <HStack gap={3}>
-
-                                                        {/* AVATAR */}
-                                                        <Flex
-                                                            boxSize="38px"
-                                                            align="center"
-                                                            justify="center"
-                                                        >
-                                                            {thread.threadType === ThreadType.GC ? (
-                                                                <BiGroup/>
-                                                            ) : (
-                                                                <Avatar.Root size="sm">
-                                                                    <Avatar.Fallback>
-                                                                        {`${displayUser?.firstName?.[0] ?? ""}${displayUser?.lastName?.[0] ?? ""}`}
-                                                                    </Avatar.Fallback>
-
-                                                                    <Avatar.Image src={displayUser?.pfp}/>
-                                                                </Avatar.Root>
-                                                            )}
-                                                        </Flex>
-
-                                                        {/* TEXT */}
-                                                        <VStack align="start" gap={0} flex={1}>
-
-                                                            <Text fontWeight="semibold" fontSize="sm">
-                                                                {thread.threadType === ThreadType.GC
-                                                                    ? thread.title
-                                                                    : `${displayUser?.firstName ?? ""} ${displayUser?.lastName ?? ""}`.trim()}
+                                                    <HStack gap={3} mb={1}>
+                                                        <Avatar.Root size="sm">
+                                                            <Avatar.Fallback>
+                                                                {`${selectedThread.owner?.firstName?.[0] ?? ""}${selectedThread.owner?.lastName?.[0] ?? ""}`}
+                                                            </Avatar.Fallback>
+                                                            <Avatar.Image
+                                                                src={selectedThread.owner?.pfp}/>
+                                                        </Avatar.Root>
+                                                        <VStack align="start" gap={0}
+                                                                flex={1}>
+                                                            <Text fontWeight="semibold"
+                                                                  fontSize="sm">
+                                                                {`${selectedThread.owner?.firstName ?? ""} ${selectedThread.owner?.lastName ?? ""}`.trim()}
                                                             </Text>
-
-                                                            <Text fontSize="xs" opacity={0.6}>
-                                                                {thread.threadType === ThreadType.GC
-                                                                    ? `Group Chat · ${(thread.otherMembers?.length ?? 0) + 1}`
-                                                                    : `@${displayUser?.handle ?? "unknown"}`}
+                                                            <Text fontSize="xs"
+                                                                  opacity={0.6}>
+                                                                @{selectedThread.owner?.handle}
                                                             </Text>
-
                                                         </VStack>
-
+                                                        <Tag.Root colorPalette="blue"
+                                                                  size="sm">
+                                                            <Tag.Label>Owner</Tag.Label>
+                                                        </Tag.Root>
                                                     </HStack>
                                                 </Box>
-                                            );
-                                        })}
 
-                                    </VStack>
-                                </VStack>
-                            )}
+                                                {/* OTHER MEMBERS */}
+                                                {selectedThread.otherMembers?.map((member: User) => (
+                                                    <Box
+                                                        key={member.handle}
+                                                        p={3}
+                                                        borderWidth="1px"
+                                                        borderRadius="lg"
+                                                        bg={theme.cardBg}
+                                                    >
+                                                        <HStack gap={3}>
+                                                            <Avatar.Root size="sm">
+                                                                <Avatar.Fallback>
+                                                                    {`${member?.firstName?.[0] ?? ""}${member?.lastName?.[0] ?? ""}`}
+                                                                </Avatar.Fallback>
+                                                                <Avatar.Image
+                                                                    src={member?.pfp}/>
+                                                            </Avatar.Root>
+                                                            <VStack align="start" gap={0}
+                                                                    flex={1}>
+                                                                <Text fontWeight="semibold"
+                                                                      fontSize="sm">
+                                                                    {`${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim()}
+                                                                </Text>
+                                                                <Text fontSize="xs"
+                                                                      opacity={0.6}>
+                                                                    @{member?.handle}
+                                                                </Text>
+                                                            </VStack>
+                                                            <Menu.Root>
+                                                                <Menu.Trigger asChild>
+                                                                    <IconButton
+                                                                        variant="ghost">
+                                                                        <MoreVertical
+                                                                            size={18}/>
+                                                                    </IconButton>
+                                                                </Menu.Trigger>
+                                                                <Portal>
+                                                                    <Menu.Positioner>
+                                                                        <Menu.Content>
+                                                                            <Menu.Item
+                                                                                value="remove"
+                                                                                asChild>
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    colorPalette="red"
+                                                                                    onClick={() => {
+                                                                                        onRemoveMember(member.id)
+                                                                                    }}>
+                                                                                    Remove
+                                                                                    from
+                                                                                    chat
+                                                                                </Button>
+                                                                            </Menu.Item>
+                                                                        </Menu.Content>
+                                                                    </Menu.Positioner>
+                                                                </Portal>
+                                                            </Menu.Root>
+                                                        </HStack>
+                                                    </Box>
+                                                ))}
+                                            </VStack>
 
-                            {/* CHAT PANEL - Show on desktop always when thread exists, on mobile when selected */}
-                            {selectedThread && (isMobile ? selectedChat !== 0 : true) && (
-                                <VStack
-                                    w={isMobile ? "100%" : selectedThread?.threadType === ThreadType.GC && isSidebarOpen ? "65%" : "80%"}
-                                    h="100%"
-                                    align="stretch"
-                                    borderWidth="1px"
-                                    borderRadius="2xl"
-                                    overflow="hidden"
-                                    bg={theme.bgPage}
-                                    transition={`all 320ms ${smooth}`}
-                                >
-
-                                    {/* HEADER */}
-                                    <HStack
-                                        px={4}
-                                        py={3}
-                                        borderBottomWidth="1px"
-                                        bg={theme.cardBg}
-                                        justify="space-between"
-                                    >
-                                        <HStack gap={3} flex={1}>
-                                            {isMobile && (
-                                                <IconButton
-                                                    variant="ghost"
-                                                    onClick={() => setSelectedChat(0)}
-                                                    size="sm"
-                                                >
-                                                    <BiChevronRight transform="rotate(180deg)"/>
-                                                </IconButton>
-                                            )}
-                                            <Heading size="md">
-                                                {chatHeading}
-                                            </Heading>
-                                        </HStack>
-
-                                        {selectedThread?.threadType === ThreadType.GC && (
-                                            <HStack gap={2}>
+                                            {/* ADD MEMBER BUTTON */}
+                                            <HStack p={4} borderTopWidth="1px">
                                                 <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                                    w="100%"
+                                                    variant="outline"
                                                     onClick={() => setIsAddMemberDialogOpen(true)}
                                                 >
                                                     <BiUserPlus/>
+                                                    Add Member
                                                 </Button>
-                                                {!isMobile && (
-                                                    <IconButton
-                                                        variant="ghost"
-                                                        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                                                        size="sm"
-                                                    >
-                                                        <BiGroup/>
-                                                    </IconButton>
-                                                )}
                                             </HStack>
-                                        )}
-                                    </HStack>
-
-                                    {/* MESSAGES */}
-                                    <VStack
-                                        flex={1}
-                                        overflowY="auto"
-                                        align="stretch"
-                                        p={4}
-                                        gap={3}
-                                        w="full"
+                                        </VStack>
+                                    )}
+                                </>
+                            ) : (
+                                <VStack>
+                                    <Text color={theme.mutedText}>No chats here yet. Create one</Text>
+                                    <Button
+                                        colorPalette="blue"
+                                        size="md"
+                                        onClick={() => setIsCreationDialogOpen(true)}
                                     >
-
-                                        {messages.length === 0 ? (
-                                            <VStack flex={1} justify="center">
-                                                <Text opacity={0.6}>
-                                                    No messages yet
-                                                </Text>
-                                            </VStack>
-                                        ) : (
-                                            messages.map((message) => {
-                                                const isSelf = message.senderHandle === user?.handle;
-
-                                                // Get sender's avatar from thread members
-                                                let senderAvatar = null;
-                                                if (selectedThread?.owner?.handle === message.senderHandle) {
-                                                    senderAvatar = selectedThread.owner.pfp;
-                                                } else if (selectedThread?.otherMembers) {
-                                                    const sender = selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle);
-                                                    senderAvatar = sender?.pfp;
-                                                }
-
-                                                return (
-                                                    <Flex
-                                                        key={message.id}
-                                                        justify={isSelf ? "flex-end" : "flex-start"}
-                                                    >
-
-                                                        {/* AVATAR - Always on left */}
-                                                        <Avatar.Root size="sm">
-                                                            <Avatar.Fallback>
-                                                                {message.senderHandle?.[0]?.toUpperCase()}
-                                                            </Avatar.Fallback>
-                                                            {senderAvatar && <Avatar.Image src={senderAvatar}/>}
-                                                        </Avatar.Root>
-
-                                                        {/* MESSAGE BUBBLE */}
-                                                            <Box
-                                                                px={4}
-                                                                py={3}
-                                                                borderRadius="2xl"
-                                                                bg={isSelf ? "blue.500" : theme.cardBg}
-                                                                color={isSelf ? "white" : undefined}
-                                                            >
-
-                                                                {/* SENDER INFO - Only show for other users */}
-                                                                {!isSelf && (
-                                                                    <VStack align="start" gap={0} mb={2}>
-                                                                        <Text
-                                                                            fontSize="sm"
-                                                                            fontWeight="bold"
-                                                                        >
-                                                                            {/* Get sender's display name */}
-                                                                            {selectedThread?.owner?.handle === message.senderHandle
-                                                                                ? `${selectedThread.owner.firstName ?? ""} ${selectedThread.owner.lastName ?? ""}`.trim()
-                                                                                : selectedThread?.otherMembers?.find((m: User) => m.handle === message.senderHandle)
-                                                                                    ? `${selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle)?.firstName ?? ""} ${selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle)?.lastName ?? ""}`.trim()
-                                                                                    : message.senderHandle
-                                                                            }
-                                                                        </Text>
-                                                                        <Text
-                                                                            fontSize="xs"
-                                                                            opacity={0.7}
-                                                                        >
-                                                                            @{message.senderHandle}
-                                                                        </Text>
-                                                                    </VStack>
-                                                                )}
-
-                                                                {/* MESSAGE CONTENT */}
-                                                                <Text whiteSpace="pre-wrap" mb={1}>
-                                                                    {message.content}
-                                                                </Text>
-
-                                                                {/* TIMESTAMP */}
-                                                                <Text
-                                                                    fontSize="10px"
-                                                                    opacity={0.6}
-                                                                    textAlign={isSelf ? "right" : "left"}
-                                                                >
-                                                                    {new Date(message.timestamp).toLocaleTimeString([], {
-                                                                        hour: "2-digit",
-                                                                        minute: "2-digit"
-                                                                    })}
-                                                                </Text>
-
-                                                            </Box>
-
-
-                                                    </Flex>
-                                                );
-                                            })
-                                        )}
-
-                                    </VStack>
-
-                                    {/* INPUT */}
-                                    <HStack p={4} borderTopWidth="1px">
-
-                                        <Textarea
-                                            value={messageInput}
-                                            onChange={(e) => setMessageInput(e.target.value)}
-                                            placeholder="Message..."
-                                            resize="none"
-                                            onKeyDown={(e) => {
-
-                                                if (e.key === "Enter" && !e.shiftKey) {
-                                                    e.preventDefault();
-                                                    handleSendMessage();
-                                                }
-                                            }}
-                                        />
-
-                                        <Button
-                                            colorPalette="blue"
-                                            onClick={handleSendMessage}
-                                        >
-                                            <BiSend/>
-                                        </Button>
-
-                                    </HStack>
-
+                                        <BiPlus/>
+                                        Create Chat
+                                    </Button>
                                 </VStack>
-                            )}
 
-                            {/* MEMBERS SIDEBAR - Desktop only, Group Chats only */}
-                            {!isMobile && selectedThread?.threadType === ThreadType.GC && isSidebarOpen && (
-                                <VStack
-                                    w="35%"
-                                    h="100%"
-                                    align="stretch"
-                                    borderWidth="1px"
-                                    borderRadius="2xl"
-                                    overflow="hidden"
-                                    bg={theme.bgPage}
-                                    transition={`all 320ms ${smooth}`}
-                                >
-                                    {/* SIDEBAR HEADER */}
-                                    <HStack
-                                        px={4}
-                                        py={3}
-                                        borderBottomWidth="1px"
-                                        bg={theme.cardBg}
-                                        justify="space-between"
-                                    >
-                                        <Heading size="md">Members</Heading>
-                                        <IconButton
-                                            variant="ghost"
-                                            onClick={() => setIsSidebarOpen(false)}
-                                            size="sm"
-                                        >
-                                            <BiX/>
-                                        </IconButton>
-                                    </HStack>
-
-                                    {/* MEMBERS LIST */}
-                                    <VStack
-                                        flex={1}
-                                        overflowY="auto"
-                                        align="stretch"
-                                        p={4}
-                                        gap={3}
-                                    >
-                                        {/* OWNER */}
-                                        <Box
-                                            p={3}
-                                            borderWidth="1px"
-                                            borderRadius="lg"
-                                            bg={theme.cardBg}
-                                        >
-                                            <HStack gap={3} mb={1}>
-                                                <Avatar.Root size="sm">
-                                                    <Avatar.Fallback>
-                                                        {`${selectedThread.owner?.firstName?.[0] ?? ""}${selectedThread.owner?.lastName?.[0] ?? ""}`}
-                                                    </Avatar.Fallback>
-                                                    <Avatar.Image src={selectedThread.owner?.pfp}/>
-                                                </Avatar.Root>
-                                                <VStack align="start" gap={0} flex={1}>
-                                                    <Text fontWeight="semibold" fontSize="sm">
-                                                        {`${selectedThread.owner?.firstName ?? ""} ${selectedThread.owner?.lastName ?? ""}`.trim()}
-                                                    </Text>
-                                                    <Text fontSize="xs" opacity={0.6}>
-                                                        @{selectedThread.owner?.handle}
-                                                    </Text>
-                                                </VStack>
-                                                <Tag.Root colorPalette="blue" size="sm">
-                                                    <Tag.Label>Owner</Tag.Label>
-                                                </Tag.Root>
-                                            </HStack>
-                                        </Box>
-
-                                        {/* OTHER MEMBERS */}
-                                        {selectedThread.otherMembers?.map((member: User) => (
-                                            <Box
-                                                key={member.handle}
-                                                p={3}
-                                                borderWidth="1px"
-                                                borderRadius="lg"
-                                                bg={theme.cardBg}
-                                            >
-                                                <HStack gap={3}>
-                                                    <Avatar.Root size="sm">
-                                                        <Avatar.Fallback>
-                                                            {`${member?.firstName?.[0] ?? ""}${member?.lastName?.[0] ?? ""}`}
-                                                        </Avatar.Fallback>
-                                                        <Avatar.Image src={member?.pfp}/>
-                                                    </Avatar.Root>
-                                                    <VStack align="start" gap={0} flex={1}>
-                                                        <Text fontWeight="semibold" fontSize="sm">
-                                                            {`${member?.firstName ?? ""} ${member?.lastName ?? ""}`.trim()}
-                                                        </Text>
-                                                        <Text fontSize="xs" opacity={0.6}>
-                                                            @{member?.handle}
-                                                        </Text>
-                                                    </VStack>
-                                                </HStack>
-                                            </Box>
-                                        ))}
-                                    </VStack>
-
-                                    {/* ADD MEMBER BUTTON */}
-                                    <HStack p={4} borderTopWidth="1px">
-                                        <Button
-                                            w="100%"
-                                            variant="outline"
-                                            onClick={() => setIsAddMemberDialogOpen(true)}
-                                        >
-                                            <BiUserPlus/>
-                                            Add Member
-                                        </Button>
-                                    </HStack>
-                                </VStack>
                             )}
 
                         </HStack>
@@ -710,7 +827,8 @@ function DMs() {
 
             </VStack>
 
-            {/* CREATE CHAT DIALOG */}
+            {/* CREATE CHAT DIALOG */
+            }
             <Dialog.Root
                 open={isCreationDialogOpen}
                 onOpenChange={(s) => {
@@ -739,7 +857,9 @@ function DMs() {
                                     {/* CHAT NAME */}
                                     <Field.Root>
                                         <Field.Label>Chat Name</Field.Label>
-                                        <Field.HelperText>Only for group chats</Field.HelperText>
+                                        <Field.HelperText>Only for group
+                                            chats
+                                        </Field.HelperText>
 
                                         <Input
                                             placeholder="Chat name"
@@ -764,7 +884,8 @@ function DMs() {
                                             <Select.HiddenSelect/>
 
                                             <Select.Control>
-                                                <Select.Trigger minH="3rem" px={3} py={2}>
+                                                <Select.Trigger minH="3rem" px={3}
+                                                                py={2}>
                                                     {selectedFriends.length > 0 ? (
                                                         <Wrap gap={2}>
                                                             {selectedFriends.map((friend: User) => (
@@ -775,12 +896,14 @@ function DMs() {
                                                                     borderRadius="full"
                                                                 >
                                                                     <HStack gap={2}>
-                                                                        <Avatar.Root size="2xs">
+                                                                        <Avatar.Root
+                                                                            size="2xs">
                                                                             <Avatar.Fallback>
                                                                                 {friend.firstName?.[0] ?? "?"}
                                                                             </Avatar.Fallback>
 
-                                                                            <Avatar.Image src={friend.pfp}/>
+                                                                            <Avatar.Image
+                                                                                src={friend.pfp}/>
                                                                         </Avatar.Root>
 
                                                                         <Tag.Label>
@@ -803,7 +926,8 @@ function DMs() {
                                                             ))}
                                                         </Wrap>
                                                     ) : (
-                                                        <Text opacity={0.6}>Select friends</Text>
+                                                        <Text opacity={0.6}>Select
+                                                            friends</Text>
                                                     )}
                                                 </Select.Trigger>
 
@@ -828,13 +952,16 @@ function DMs() {
                                                                     key={item.value}
                                                                     item={item}
                                                                 >
-                                                                    <HStack gap={3} w="100%">
-                                                                        <Avatar.Root size="sm">
+                                                                    <HStack gap={3}
+                                                                            w="100%">
+                                                                        <Avatar.Root
+                                                                            size="sm">
                                                                             <Avatar.Fallback>
                                                                                 {full?.firstName?.[0] ?? "?"}
                                                                             </Avatar.Fallback>
 
-                                                                            <Avatar.Image src={full?.pfp}/>
+                                                                            <Avatar.Image
+                                                                                src={full?.pfp}/>
                                                                         </Avatar.Root>
 
                                                                         <Text>
@@ -881,7 +1008,8 @@ function DMs() {
                 </Portal>
             </Dialog.Root>
 
-            {/* ADD MEMBER DIALOG */}
+            {/* ADD MEMBER DIALOG */
+            }
             <Dialog.Root
                 open={isAddMemberDialogOpen}
                 onOpenChange={(s) => {
@@ -910,7 +1038,6 @@ function DMs() {
                                     {/* FRIEND MULTI SELECT FOR ADDING TO GROUP */}
                                     <Field.Root>
                                         <Field.Label>Select Friends to Add</Field.Label>
-
                                         <Select.Root
                                             multiple
                                             collection={friendsCollection}
@@ -922,7 +1049,8 @@ function DMs() {
                                             <Select.HiddenSelect/>
 
                                             <Select.Control>
-                                                <Select.Trigger minH="3rem" px={3} py={2}>
+                                                <Select.Trigger minH="3rem" px={3}
+                                                                py={2}>
                                                     {selectedMembersToAdd.length > 0 ? (
                                                         <Wrap gap={2}>
                                                             {selectedMembersToAdd.map((handle: string) => {
@@ -935,12 +1063,14 @@ function DMs() {
                                                                         borderRadius="full"
                                                                     >
                                                                         <HStack gap={2}>
-                                                                            <Avatar.Root size="2xs">
+                                                                            <Avatar.Root
+                                                                                size="2xs">
                                                                                 <Avatar.Fallback>
                                                                                     {friend?.firstName?.[0] ?? "?"}
                                                                                 </Avatar.Fallback>
 
-                                                                                <Avatar.Image src={friend?.pfp}/>
+                                                                                <Avatar.Image
+                                                                                    src={friend?.pfp}/>
                                                                             </Avatar.Root>
 
                                                                             <Tag.Label>
@@ -964,7 +1094,8 @@ function DMs() {
                                                             })}
                                                         </Wrap>
                                                     ) : (
-                                                        <Text opacity={0.6}>Select friends to add</Text>
+                                                        <Text opacity={0.6}>Select
+                                                            friends to add</Text>
                                                     )}
                                                 </Select.Trigger>
 
@@ -977,7 +1108,6 @@ function DMs() {
                                             <Portal>
                                                 <Select.Positioner>
                                                     <Select.Content>
-
                                                         {friendsCollection.items.map((item) => {
 
                                                             const full = friends.find(
@@ -995,13 +1125,16 @@ function DMs() {
                                                                     key={item.value}
                                                                     item={item}
                                                                 >
-                                                                    <HStack gap={3} w="100%">
-                                                                        <Avatar.Root size="sm">
+                                                                    <HStack gap={3}
+                                                                            w="100%">
+                                                                        <Avatar.Root
+                                                                            size="sm">
                                                                             <Avatar.Fallback>
                                                                                 {full?.firstName?.[0] ?? "?"}
                                                                             </Avatar.Fallback>
 
-                                                                            <Avatar.Image src={full?.pfp}/>
+                                                                            <Avatar.Image
+                                                                                src={full?.pfp}/>
                                                                         </Avatar.Root>
 
                                                                         <Text>
@@ -1035,11 +1168,16 @@ function DMs() {
                                 <Button
                                     colorPalette="blue"
                                     disabled={!selectedMembersToAdd.length}
-                                    onClick={async () => {
-                                        // TODO: Add API call to add members to the group chat
-                                        // For now, just close the dialog
-                                        setIsAddMemberDialogOpen(false);
-                                        setSelectedMembersToAdd([]);
+                                    onClick={() => {
+                                        addMembers(
+                                            selectedThread!!.id,
+                                            selectedMembersToAdd)
+                                            .then(() => {
+                                                    setIsAddMemberDialogOpen(false);
+                                                    setSelectedMembersToAdd([]);
+                                                    fetchThreads();
+                                                }
+                                            );
                                     }}
                                 >
                                     Add Members
@@ -1052,7 +1190,8 @@ function DMs() {
             </Dialog.Root>
 
         </>
-    );
+    )
+        ;
 }
 
 export default DMs;

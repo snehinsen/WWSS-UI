@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {FaBell} from "react-icons/fa6";
-import {Badge, Button, Drawer, Heading, IconButton, Link, Portal, Text, VStack} from "@chakra-ui/react";
+import {Badge, Box, Button, Drawer, Heading, IconButton, Portal, Text, VStack} from "@chakra-ui/react";
 import {useThemeColors} from "./ui/theme.ts";
 import {CgClose} from "react-icons/cg";
 import {Notification} from "../backend/types.ts";
@@ -17,8 +17,18 @@ export default function Notifications() {
     }
 
     const onClear = async (id: number) => {
+        console.log(`Clearing notification with ID: ${id}`)
+        const item = notificationList
+            .find(item => item.id === id)!!
         await clearNotification(id)
         await loadNotifications()
+        console.log(`Notification cleared: ${item.tittle}`)
+        if (item.tittle.includes("wants to be friends with you")) {
+            window.location.href = "/app/friends";
+        }
+        if (item.tittle.includes("mentioned you")) {
+            window.location.href = "/app/feed";
+        }
     }
 
     const onClearAll = async () => {
@@ -128,9 +138,8 @@ function NotificationItem({notification, onClear}: NotificationProps) {
     const format: string = date.toLocaleString("en-US", options)
 
     return (
-        <Link
+        <Box
             _hover={{textDecoration: "none"}}
-            asChild
             onClick={() => {
                 onClear(notification.id)
             }}
@@ -144,11 +153,11 @@ function NotificationItem({notification, onClear}: NotificationProps) {
                 borderWidth="2px"
                 borderColor={theme.border}
             >
-                <Heading size="2xl">{notification.title}</Heading>
+                <Heading size="2xl">{notification.tittle}</Heading>
                 <Text color={theme.mutedText}>{format}</Text>
                 <Text>{notification.body}</Text>
             </VStack>
-        </Link>
+        </Box>
     )
 
 }

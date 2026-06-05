@@ -69,7 +69,7 @@ function FriendCard({friend, isRequest = false, onDecline, onAccept}: Props) {
                     </Text>
                 </VStack>
                 <Spacer w="full"/>
-                {isRequest && (
+                {isRequest ? (
                     <>
                         <IconButton
                             variant="subtle"
@@ -86,6 +86,24 @@ function FriendCard({friend, isRequest = false, onDecline, onAccept}: Props) {
                             }}>
                             <CgClose/>
                         </IconButton>
+                    </>
+                ) : (
+                    <>
+                        {/*<IconButton*/}
+                        {/*    variant="subtle"*/}
+                        {/*    onClick={() => {*/}
+
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    <MessageSquare/>*/}
+                        {/*</IconButton>*/}
+                        {/*<IconButton*/}
+                        {/*    variant="subtle"*/}
+                        {/*    onClick={() => {*/}
+                        {/*        onDecline!!()*/}
+                        {/*    }}>*/}
+                        {/*    <CgClose/>*/}
+                        {/*</IconButton>*/}
                     </>
                 )}
             </HStack>

@@ -33,7 +33,7 @@ export interface Notification {
     id: number,
     body: string,
     timeSent: string,
-    title: string
+    tittle: string
 }
 
 
