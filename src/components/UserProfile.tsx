@@ -96,7 +96,7 @@ function UserProfile({name}: Props) {
                 setLoading(false);
             }
         };
-
+        console.log(selectedUser?.friends!!)
         fetchProfile();
     }, [name, user]);
 
@@ -154,7 +154,8 @@ function UserProfile({name}: Props) {
                                     <Avatar.Fallback>{selectedUser.firstName.charAt(0)}{selectedUser.lastName.charAt(0)}</Avatar.Fallback>
                                 </Avatar.Root>
                                 <VStack align="start" gap={1}>
-                                    <Heading className="title" size="4xl">{selectedUser.firstName} {selectedUser.lastName}</Heading>
+                                    <Heading className="title"
+                                             size="4xl">{selectedUser.firstName} {selectedUser.lastName}</Heading>
                                     <Text color={theme.textSecondary}>@{selectedUser.handle}</Text>
                                     <Text color={theme.textPrimary}>{selectedUser.bio ?? "No bio set"}</Text>
                                 </VStack>
@@ -231,22 +232,24 @@ function UserProfile({name}: Props) {
                                 </Tabs.Trigger>
                             </Tabs.List>
 
-                            <Tabs.Content value="friends">
-                                <Box w="100%">
-                                    <Heading size="lg" mb={4} color={theme.textPrimary}>
-                                        Friends
-                                    </Heading>
+                            <Box w="100%">
+                                <Heading size="lg" mb={4} color={theme.textPrimary}>
+                                    Friends
+                                </Heading>
 
-                                    {selectedUser.friends.length > 0 ? (
-                                        <Grid
-                                            templateColumns={{
-                                                base: "repeat(2, 1fr)",
-                                                md: "repeat(3, 1fr)",
-                                                lg: "repeat(4, 1fr)",
-                                            }}
-                                            gap={4}
-                                        >
-                                            {selectedUser!!.friends.map((f: User) => (
+                                {selectedUser.friends.length > 0 ? (
+                                    <Grid
+                                        templateColumns={{
+                                            base: "repeat(2, 1fr)",
+                                            md: "repeat(3, 1fr)",
+                                            lg: "repeat(4, 1fr)",
+                                        }}
+                                        gap={4}
+                                    >
+                                        {selectedUser.friends?.map((f: User) => {
+                                            console.log("Friend render:", f);
+
+                                            return (
                                                 <VStack
                                                     key={f.id}
                                                     bg={theme.cardBg}
@@ -260,27 +263,31 @@ function UserProfile({name}: Props) {
                                                 >
                                                     <Avatar.Root size="xl">
                                                         <Avatar.Image src={f.pfp} alt={f.firstName}/>
-                                                        <Avatar.Fallback>{f.firstName.charAt(0)+f.lastName.charAt(0)}</Avatar.Fallback>
+                                                        <Avatar.Fallback>
+                                                            {(f.firstName?.charAt(0) ?? "") + (f.lastName?.charAt(0) ?? "")}
+                                                        </Avatar.Fallback>
                                                     </Avatar.Root>
+
                                                     <Text fontWeight="600" color={theme.textPrimary}>
-                                                        {f.firstName} {f.lastName}
+                                                        {f.firstName} {f.lastName != "" && f.lastName != undefined ? f.lastName : "No last name"}
                                                     </Text>
+
                                                     <Text fontSize="sm" color={theme.textSecondary}>
                                                         @{f.handle}
                                                     </Text>
                                                 </VStack>
-                                            ))}
-                                        </Grid>
-                                    ) : (
-                                        <Box py={12} textAlign="center" bg={theme.hoverBg} borderRadius="lg">
-                                            <Text color={theme.textSecondary}>
-                                                {selectedUser.firstName.split(" ")[0]} has no friends yet, and is OH so
-                                                lonely 😭.
-                                            </Text>
-                                        </Box>
-                                    )}
-                                </Box>
-                            </Tabs.Content>
+                                            );
+                                        })}
+                                    </Grid>
+                                ) : (
+                                    <Box py={12} textAlign="center" bg={theme.hoverBg} borderRadius="lg">
+                                        <Text color={theme.textSecondary}>
+                                            {selectedUser.firstName.split(" ")[0]} has no friends yet, and is OH so
+                                            lonely 😭.
+                                        </Text>
+                                    </Box>
+                                )}
+                            </Box>
 
                             <Tabs.Content value="posts">
                                 {(posts.length > 0) ? (

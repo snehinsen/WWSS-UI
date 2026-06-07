@@ -113,10 +113,8 @@ function DMs() {
     const fetchThreads = async () => {
 
         try {
-
             const res = await listThreads();
             setThreads(res);
-
         } catch (e) {
             console.error(e);
         }
@@ -435,7 +433,12 @@ function DMs() {
                                                                                                 deleteThread(thread.id)
                                                                                                     .then(fetchThreads)
                                                                                             } else if (isDM) {
-                                                                                                deleteThread(thread.id).then(fetchThreads)
+                                                                                                deleteThread(thread.id).then(() => {
+                                                                                                    fetchThreads();
+                                                                                                    if (selectedChat === thread.id) {
+                                                                                                        setSelectedChat(0);
+                                                                                                    }
+                                                                                                })
                                                                                             } else {
                                                                                                 onLeaveChat(thread.id).then(fetchThreads)
                                                                                             }
@@ -443,8 +446,7 @@ function DMs() {
                                                                                     >
                                                                                         {ownerIsCurrentUser && !isDM ?
                                                                                             "Delete chat"
-                                                                                            : isDM ?
-                                                                                                "Close DM" : "Leave chat"
+                                                                                            : isDM ? "Close DM" : "Leave chat"
                                                                                         }
                                                                                     </Menu.Item>
                                                                                 </Menu.Content>
@@ -540,15 +542,7 @@ function DMs() {
                                                 ) : (
                                                     messages.map((message) => {
                                                         const isSelf = message.senderHandle === user?.handle;
-
-                                                        // Get sender's avatar from thread members
-                                                        let senderAvatar = null;
-                                                        if (selectedThread?.owner?.handle === message.senderHandle) {
-                                                            senderAvatar = selectedThread.owner.pfp;
-                                                        } else if (selectedThread?.otherMembers) {
-                                                            const sender = selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle);
-                                                            senderAvatar = sender?.pfp;
-                                                        }
+                                                        const sender: User | null = selectedThread!!.owner.handle === message.senderHandle ? selectedThread.owner : selectedThread.otherMembers.find((m: User) => m.handle === message.senderHandle) ?? null;
 
                                                         return (
                                                             <Flex
@@ -556,16 +550,13 @@ function DMs() {
                                                                 justify={isSelf ? "flex-end" : "flex-start"}
                                                             >
 
-                                                                {/* AVATAR - Always on left */}
+                                                                {/* AVATAR */}
                                                                 <Avatar.Root size="sm">
                                                                     <Avatar.Fallback>
-                                                                        {message.senderHandle?.[0]?.toUpperCase()}
+                                                                        {sender!!.firstName.charAt(0).toUpperCase() + sender!!.lastName.charAt(0).toUpperCase()}
                                                                     </Avatar.Fallback>
-                                                                    {senderAvatar &&
-                                                                        <Avatar.Image
-                                                                            src={senderAvatar}/>}
+                                                                    <Avatar.Image src={sender!!.pfp}/>
                                                                 </Avatar.Root>
-
                                                                 {/* MESSAGE BUBBLE */}
                                                                 <Box
                                                                     px={4}
@@ -579,7 +570,9 @@ function DMs() {
                                                                     {!isSelf && (
                                                                         <VStack
                                                                             align="start"
-                                                                            gap={0} mb={2}>
+                                                                            gap={0}
+                                                                            mb={2}
+                                                                        >
                                                                             <Text
                                                                                 fontSize="sm"
                                                                                 fontWeight="bold"
@@ -758,31 +751,64 @@ function DMs() {
                                                                     @{member?.handle}
                                                                 </Text>
                                                             </VStack>
+
                                                             <Menu.Root>
                                                                 <Menu.Trigger asChild>
-                                                                    <IconButton
-                                                                        variant="ghost">
-                                                                        <MoreVertical
-                                                                            size={18}/>
+                                                                    <IconButton variant="ghost">
+                                                                        <MoreVertical size={18}/>
                                                                     </IconButton>
                                                                 </Menu.Trigger>
                                                                 <Portal>
                                                                     <Menu.Positioner>
                                                                         <Menu.Content>
                                                                             <Menu.Item
-                                                                                value="remove"
-                                                                                asChild>
-                                                                                <Button
-                                                                                    variant="ghost"
-                                                                                    colorPalette="red"
-                                                                                    onClick={() => {
-                                                                                        onRemoveMember(member.id)
-                                                                                    }}>
-                                                                                    Remove
-                                                                                    from
-                                                                                    chat
-                                                                                </Button>
+                                                                                value="message"
+                                                                                onClick={async () => {
+                                                                                    // Check for existing DM with this member
+                                                                                    const existingDM = threads.find(t =>
+                                                                                        t.threadType === ThreadType.DM &&
+                                                                                        (
+                                                                                            (t.owner.handle === member.handle) ||
+                                                                                            (t.otherMembers?.some((m: User) => m.handle === member.handle))
+                                                                                        )
+                                                                                    );
+
+                                                                                    if (existingDM) {
+                                                                                        // Navigate to existing DM
+                                                                                        setSelectedChat(existingDM.id);
+                                                                                        setIsSidebarOpen(false);
+                                                                                    } else {
+                                                                                        // Create a new DM
+                                                                                        const previousIds = new Set(threads.map(t => t.id));
+                                                                                        const success = await createThread({
+                                                                                            tittle: "",
+                                                                                            handles: [member.handle],
+                                                                                        });
+                                                                                        if (success) {
+                                                                                            const newThreads = await listThreads();
+                                                                                            setThreads(newThreads);
+                                                                                            const newThread = newThreads.find((t: Thread) => !previousIds.has(t.id));
+                                                                                            if (newThread) {
+                                                                                                setSelectedChat(newThread.id);
+                                                                                                setIsSidebarOpen(false);
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                Message
                                                                             </Menu.Item>
+
+                                                                            {/* Only show Remove if current user is the GC owner */}
+                                                                            {user?.handle === selectedThread.owner.handle && (
+                                                                                <Menu.Item
+                                                                                    value="remove"
+                                                                                    color="red"
+                                                                                    onClick={() => onRemoveMember(member.id)}
+                                                                                >
+                                                                                    Remove from chat
+                                                                                </Menu.Item>
+                                                                            )}
                                                                         </Menu.Content>
                                                                     </Menu.Positioner>
                                                                 </Portal>

@@ -93,29 +93,32 @@ function Friends() {
                         justifyContent={positionBreakpoint}
                         px={4}
                     >
-                        <Heading
-                            size="3xl"
-                            mb={4}
-                        >
-                            Friend Requests ({friendRequests.length})
-                        </Heading>
-
                         {friendRequests.length > 0 && (
-                            <VStack gap={3} align="stretch">
-                                {friendRequests.map((request: FriendRequest) => (
-                                    <FriendCard
-                                        friend={request.sender}
-                                        isRequest
-                                        key={request.id}
-                                        onAccept={() => {
-                                            acceptFriendRequests(request.id).then(fetchRequests)
-                                        }}
-                                        onDecline={() => {
-                                            declineFriendRequests(request.id).then(fetchRequests)
-                                        }}
-                                    />
-                                ))}
-                            </VStack>
+                            <>
+                                <Heading
+                                    size="3xl"
+                                    mb={4}
+                                >
+                                    Friend Requests ({friendRequests.length})
+                                </Heading>
+
+
+                                <VStack gap={3} align="stretch">
+                                    {friendRequests.map((request: FriendRequest) => (
+                                        <FriendCard
+                                            friend={request.sender}
+                                            isRequest
+                                            key={request.id}
+                                            onAccept={() => {
+                                                acceptFriendRequests(request.id).then(fetchRequests)
+                                            }}
+                                            onDecline={() => {
+                                                declineFriendRequests(request.id).then(fetchRequests)
+                                            }}
+                                        />
+                                    ))}
+                                </VStack>
+                            </>
                         )}
                     </Box>
 

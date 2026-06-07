@@ -7,7 +7,7 @@ import {useThemeColors} from "../ui/theme.ts";
 interface Props {
     id: number;
     isOpen: boolean;
-    onCLoseEvent: () => void;
+    onCloseEvent: () => void;
     onPostEvent: () => void;
     anchorRect?: {
         left: number;
@@ -16,7 +16,7 @@ interface Props {
     };
 }
 
-function MakeComment({id, isOpen, onCLoseEvent, onPostEvent, anchorRect}: Props) {
+function MakeComment({id, isOpen, onCloseEvent, onPostEvent, anchorRect}: Props) {
     const theme = useThemeColors();
     const [body, setBody] = useState("");
     const [success, setSuccess] = useState<boolean | null>(null);
@@ -26,7 +26,7 @@ function MakeComment({id, isOpen, onCLoseEvent, onPostEvent, anchorRect}: Props)
 
     const handleCancel = () => {
         setBody("");
-        onCLoseEvent();
+        onCloseEvent();
     };
 
     const handleComment = async () => {
@@ -88,7 +88,7 @@ function MakeComment({id, isOpen, onCLoseEvent, onPostEvent, anchorRect}: Props)
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onCLoseEvent();
+            if (e.key === "Escape") onCloseEvent();
         };
         if (anchorRect) {
             window.addEventListener("keydown", onKey);

@@ -9,6 +9,7 @@ import SetupPage from "./pages/SetupPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import FriendsPage from "./pages/FriendsPage.tsx";
 import DMsPage from "./pages/DMsPage.tsx";
+import PostPage from "./pages/PostPage.tsx";
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/app/settings" element={<SettingsPage />}/>
                 <Route path="/app/friends" element={<FriendsPage />}/>
                 <Route path="/app/dms" element={<DMsPage />}/>
+                <Route path="/app/post/:pid" element={<PostPage />}/>
                 <Route path="/setup" element={<SetupPage/>}/>
             </Routes>
         </Router>

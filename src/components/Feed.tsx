@@ -4,8 +4,8 @@ import { getFeed } from "../backend/api.ts";
 import MakePost from "./PostMedia/makePost.tsx";
 import "../syles/feed.css";
 import { Post } from "../backend/types.ts";
-import PostCard from "./PostMedia/Post.tsx";
 import {useThemeColors} from "./ui/theme.ts";
+import PostCard from "./PostMedia/PostCard.tsx";
 
 function Feed() {
     const [posts, setPosts] = useState<Post[]>([]);

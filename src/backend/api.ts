@@ -178,6 +178,11 @@ export async function getUserPosts(name: string) {
     return response.data || [];
 }
 
+export async function getPost(id: number) {
+    const res: AxiosResponse<Post> = await api.get(`/post/${id}`);
+    return res.data;
+}
+
 export async function deletePost(id: number) {
     console.log("Deleting...");
     const res: AxiosResponse<boolean> = await api.delete(

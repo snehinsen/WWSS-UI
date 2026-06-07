@@ -4,7 +4,7 @@ import {Text, VStack} from "@chakra-ui/react";
 import {Post} from "../../backend/types.ts";
 
 import {useThemeColors} from "../ui/theme.ts";
-import PostCard from "./Post.tsx";
+import PostCard from "./PostCard.tsx";
 
 interface Props {
     postId: number;

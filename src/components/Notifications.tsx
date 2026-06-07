@@ -22,11 +22,11 @@ export default function Notifications() {
             .find(item => item.id === id)!!
         await clearNotification(id)
         await loadNotifications()
-        console.log(`Notification cleared: ${item.tittle}`)
-        if (item.tittle.includes("wants to be friends with you")) {
+        console.log(`Notification cleared: ${item.title}`)
+        if (item.title.includes("sent you a friend reques")) {
             window.location.href = "/app/friends";
         }
-        if (item.tittle.includes("mentioned you")) {
+        else if (item.title.includes("mentioned you") || item.title.includes("accepted your friend request")) {
             window.location.href = "/app/feed";
         }
     }
@@ -141,6 +141,7 @@ function NotificationItem({notification, onClear}: NotificationProps) {
         <Box
             _hover={{textDecoration: "none"}}
             onClick={() => {
+
                 onClear(notification.id)
             }}
         >
@@ -153,7 +154,7 @@ function NotificationItem({notification, onClear}: NotificationProps) {
                 borderWidth="2px"
                 borderColor={theme.border}
             >
-                <Heading size="2xl">{notification.tittle}</Heading>
+                <Heading size="2xl">{notification.title}</Heading>
                 <Text color={theme.mutedText}>{format}</Text>
                 <Text>{notification.body}</Text>
             </VStack>
