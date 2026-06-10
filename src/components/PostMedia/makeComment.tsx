@@ -66,7 +66,7 @@ function MakeComment({id, isOpen, onCloseEvent, onPostEvent, anchorRect}: Props)
             )}
 
             <Box w="100%" minW={0}>
-                <TipTapEditor onChange={handleBodyChange}/>
+                <TipTapEditor onChange={handleBodyChange} value={body}/>
 
                 <HStack mt={4} justify="flex-end" flexWrap="wrap" gap={2}>
                     {/* Prevent buttons from shrinking the editor width in tight layouts */}

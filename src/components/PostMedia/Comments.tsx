@@ -59,6 +59,7 @@ function Comments({postId, isComment = false, isLatest, onSync}: Props) {
                     onDeleteEvent={() => {
                         setTimeout(fetchComments, 200);
                     }}
+                    onLikeEvent={fetchComments}
                 />
             ))}
         </VStack>

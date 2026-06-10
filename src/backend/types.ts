@@ -1,16 +1,17 @@
 // User related types
 
 export interface User {
-    "bio": string,
-    "email": string,
-    "friends": User[],
-    "handle": string,
-    "id": number,
-    "isBot": boolean,
-    "isWizarding": boolean,
-    "firstName": string,
-    "lastName": string,
-    "pfp": string
+    bio: string,
+    email: string,
+    friends: User[],
+    handle: string,
+    id: number,
+    isBot: boolean,
+    isWizarding: boolean,
+    firstName: string,
+    lastName: string,
+    pfp: string,
+    isSetup: boolean,
 }
 
 export interface UserRegistration {
@@ -43,7 +44,8 @@ export interface Post {
     "body": string,
     "attachedMedia": [],
     "user": User,
-    "id": number
+    "id": number,
+    "likedBy": number[]
 }
 
 export interface ThreadCreateRequest {

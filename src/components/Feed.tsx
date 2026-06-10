@@ -100,6 +100,7 @@ function Feed() {
                             onDeleteEvent={() => {
                                 setTimeout(fetchPosts, 200);
                             }}
+                            onLikeEvent={fetchPosts}
                         />
                     </Box>
                 ))

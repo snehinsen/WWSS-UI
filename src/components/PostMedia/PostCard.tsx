@@ -17,7 +17,7 @@ import Comments from "./Comments.tsx";
 import "../../syles/feed.css";
 import {Post} from "../../backend/types.ts";
 import {useThemeColors} from "../ui/theme.ts";
-import {BsHandThumbsUp} from "react-icons/bs";
+import {BsHandThumbsUp, BsHandThumbsUpFill} from "react-icons/bs";
 import {BiComment, BiTrash} from "react-icons/bi";
 import {useEffect, useRef, useState} from "react";
 import {renderPostBody} from "./HTML2Chakra.tsx";
@@ -25,20 +25,21 @@ import {MoreVertical} from "lucide-react";
 import {AiFillCopy} from "react-icons/ai";
 import {useUserContext} from "../../context/userContext.tsx";
 import {FaFlag} from "react-icons/fa";
-import {deletePost} from "../../backend/api.ts";
+import {deletePost, toggleLike} from "../../backend/api.ts";
 import UserProfileBadge from "../ui/UserProfileBadge.tsx";
 import {YouTubeEmbeds} from "./YouTubeEmbedNew.tsx";
 import {extractAllYouTubeVideoIds} from "./YouTubeExtractor.ts";
+
 
 interface Props {
     post: Post;
     isComment?: boolean;
     onDeleteEvent: () => void;
+    onLikeEvent: () => void;
 }
 
-function PostCard({post, isComment = false, onDeleteEvent}: Props) {
+function PostCard({post, isComment = false, onDeleteEvent, onLikeEvent}: Props) {
     const theme = useThemeColors();
-    const DEBUG_LAYOUT = false; // set true to show debug outlines for layout troubleshooting
     const [replyOpen, setReplyOpen] = useState(false);
     const actionRef = useRef<HTMLDivElement | null>(null);
     const postRef = useRef<HTMLDivElement | null>(null);
@@ -51,6 +52,15 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
     // Extract YouTube video IDs from post body
     const youtubeVideoIds = extractAllYouTubeVideoIds(post.body);
 
+    const onLike = async () => {
+        const result = await toggleLike(post.id)
+
+        if (!result) {
+            alert("Failed to like post");
+        }
+
+        onLikeEvent()
+    }
 
     useEffect(() => {
         if (!replyOpen) return;
@@ -96,7 +106,7 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
         };
     }, [replyOpen]);
 
-    const {user} = useUserContext();
+    const {user, loading} = useUserContext();
 
     const [isSynced, setIsSynced] = useState<boolean>(true)
 
@@ -104,8 +114,18 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
         await deletePost(id)
         onDeleteEvent();
     }
+    const onCopyLink = (id: number) => {
+        console.log("CopyLink", id);
+        const url = `${window.location.origin}/app/post/${id}`;
+        console.log(`url: ${url}`);
+        navigator.clipboard.writeText(url).then(() => {
+            console.debug(`Copied post URL to clipboard: ${url}`);
+        }).catch((err) => {
+            console.error("Failed to copy post URL: ", err);
+        });
+    }
 
-    return (
+    return !loading ? (
         <Box
             bg={theme.cardBg}
             w="100%"
@@ -114,7 +134,6 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
             borderRadius={{base: "0.5rem", md: "0.75rem"}}
             boxShadow={isComment ? `inset 3px 0 0 0 ${theme.border}` : undefined}
             ref={postRef}
-            border={DEBUG_LAYOUT ? "2px dashed rgba(255,0,0,0.6)" : undefined}
             data-root-post={isComment ? undefined : "true"}
         >
             <HStack
@@ -164,8 +183,15 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                     </Menu.Trigger>
                     <Menu.Positioner>
                         <Menu.Content>
-                            <Menu.Item value="cplnk">
-                                <AiFillCopy/> Copy Link
+                            <Menu.Item
+                                value="cplnk"
+                                onClick={
+                                    () => {
+                                        onCopyLink(post.id)
+                                    }
+                                }
+                            >
+                                <AiFillCopy/> Copy Link to post
                             </Menu.Item>
                             {/* Delete option for own posts only, flag for rest */}
                             <Menu.Item
@@ -214,7 +240,7 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
             {/* YouTube video embeds */}
             {youtubeVideoIds.length > 0 && (
                 <Box w="100%" mt={3} mb={1}>
-                    <YouTubeEmbeds videoIds={youtubeVideoIds} />
+                    <YouTubeEmbeds videoIds={youtubeVideoIds}/>
                 </Box>
             )}
 
@@ -224,9 +250,13 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                 pl={0}
             >
                 <HStack gap={2} flexWrap="wrap" minW={0} ref={actionRef as any}>
-                    <Button w={{base: "100%", md: "48%"}} variant="outline">
-                        <BsHandThumbsUp/> Like
-                    </Button>
+                    <IconButton
+                        w={{base: "100%", md: "48%"}}
+                        variant="outline"
+                        onClick={onLike}
+                    >
+                        {post.likedBy.includes(user!!.id) ? <BsHandThumbsUpFill /> : <BsHandThumbsUp/>} Like {post.likedBy.length}
+                    </IconButton>
                     <Button
                         w={{base: "100%", md: "48%"}}
                         variant="outline"
@@ -236,10 +266,8 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                     </Button>
                 </HStack>
 
-                <Box w="100%" pl={{base: 1, md: 2}} position="relative" px={{base: 3, md: 4}} mx={{base: -3, md: -4}}
-                     border={DEBUG_LAYOUT ? "1px dashed rgba(0,0,255,0.5)" : undefined}>
-                    {/* Pass the computed anchorRect so the comment composer can render in a Portal anchored
-                        to this post's visual position (avoids nested layout shrinking). */}
+                <Box w="100%" pl={{base: 1, md: 2}} position="relative" px={{base: 3, md: 4}} mx={{base: -3, md: -4}}>
+
                     <MakeComment
                         {...({
                             id: post.id,
@@ -277,7 +305,7 @@ function PostCard({post, isComment = false, onDeleteEvent}: Props) {
                 </Box>
             </Box>
         </Box>
-    );
+    ) : <Spacer />;
 }
 
 export default PostCard;

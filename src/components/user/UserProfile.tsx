@@ -11,21 +11,28 @@ import {
     Portal,
     Spinner,
     Text,
+    useBreakpointValue,
     VStack,
 } from "@chakra-ui/react";
-
-import {getFriendRequest, getProfile, getUserPosts, removeFriend, sendFriendRequests,} from "../../backend/api.ts";
-
-import {FriendRequest, Post, User} from "../../backend/types.ts";
+import {
+    acceptFriendRequests,
+    declineFriendRequests,
+    getFriendRequest,
+    getProfile,
+    removeFriend,
+    sendFriendRequests,
+} from "../../backend/api.ts";
 
 import {BsPerson} from "react-icons/bs";
-import {useThemeColors} from "../ui/theme.ts";
-import {FaEdit} from "react-icons/fa";
+
+import {FaCheck, FaEdit} from "react-icons/fa";
 import {CiSettings} from "react-icons/ci";
-import {useUserContext} from "../../context/userContext.tsx";
-import {FiMoreVertical} from "react-icons/fi";
-import UserProfileBadge from "../ui/UserProfileBadge.tsx";
 import {IoPersonRemoveOutline} from "react-icons/io5";
+import {FiMoreVertical} from "react-icons/fi";
+import {FriendRequest, User} from "../../backend/types.ts";
+import {useUserContext} from "../../context/userContext.tsx";
+import {useThemeColors} from "../ui/theme.ts";
+import {FaX} from "react-icons/fa6";
 
 interface Props {
     name: string;
@@ -43,9 +50,6 @@ function UserProfile({name}: Props) {
     const [friendRequestState, setFriendRequestState] =
         useState<FriendRequest | null>(null);
 
-    const [posts, setPosts] = useState<Post[]>([]);
-
-
     const requestFriend = () => {
         if (!selectedUser) return;
 
@@ -53,60 +57,66 @@ function UserProfile({name}: Props) {
 
         sendFriendRequests(selectedUser.handle).then(() => {
             getFriendRequest(selectedUser.handle).then((state) => {
+                console.log("Loading friend request state");
+                console.log(state);
+                console.log(typeof state)
                 setFriendRequestState(state);
             });
         });
     };
 
+    const loadFriendRequestState = async () => {
+        try {
+            const state = await getFriendRequest(name);
+            console.log("Loading friend request state");
+            console.log(state);
+            console.log(typeof state)
+            setFriendRequestState(state);
+        } catch (err) {
+            console.error(err);
+            setFriendRequestState(null);
+        }
+    };
+
+    useBreakpointValue<"horizontal" | "vertical" | undefined>({
+        base: "vertical",
+        md: "horizontal"
+    });
     useEffect(() => {
         if (!name) {
             window.location.href = "/app/not-found";
             return;
         }
 
-        const loadFriendRequestState = async () => {
-            try {
-                const state: FriendRequest | null =
-                    await getFriendRequest(name);
-
-                setFriendRequestState(state);
-            } catch (err) {
-                console.error(err);
-                setFriendRequestState(null);
-            }
-        };
-
         const fetchProfile = async () => {
             try {
                 setLoading(true);
 
-                const profile: User = await getProfile(name);
+                const profile = await getProfile(name);
 
                 let resolvedUser: User = profile;
-                let me = false;
+                let me: boolean = false;
 
                 if (user && profile.handle === user.handle) {
                     resolvedUser = user;
                     me = true;
                 }
 
-                const postsData: Post[] =
-                    await getUserPosts(resolvedUser.handle);
 
+                const friend = !!resolvedUser.friends?.some(
+                    (f) => f.handle === user?.handle
+                );
+
+                // ensure arrays are never undefined
                 resolvedUser = {
                     ...resolvedUser,
                     friends: resolvedUser.friends ?? [],
                 };
 
-                const friend =
-                    !!resolvedUser.friends?.some(
-                        (f: User) => f.handle === user?.handle
-                    );
-
                 setSelectedUser(resolvedUser);
                 setIsMe(me);
                 setIsFriend(friend);
-                setPosts(postsData ?? []);
+
             } catch (err) {
                 console.error(err);
                 setSelectedUser(null);
@@ -114,41 +124,22 @@ function UserProfile({name}: Props) {
                 setLoading(false);
             }
         };
-
+        console.log(selectedUser?.friends!!)
         fetchProfile();
-        loadFriendRequestState();
+        loadFriendRequestState()
     }, [name, user]);
 
-    if (!selectedUser || !user) {
+    if (!selectedUser || !user)
         return loading ? (
-            <Spinner
-                size="xl"
-                color={theme.textPrimary}
-                justifySelf="center"
-                alignSelf="center"
-            />
+            <Spinner size="xl" color={theme.textPrimary} justifySelf="center" alignSelf="center"/>
         ) : (
-            <Text color={theme.textPrimary}>
-                This profile doesn't appear to exist :(
-            </Text>
+            <Text color={theme.textPrimary}>This profile doesn't appear to exist :(</Text>
         );
-    }
 
     return (
-        <Box
-            w="100%"
-            minH="100vh"
-            bg={theme.bgPage}
-            py={{base: 4, md: 6}}
-            px={{base: 3, md: 6}}
-        >
+        <Box w="100%" minH="100vh" bg={theme.bgPage} py={{base: 4, md: 6}} px={{base: 3, md: 6}}>
             {loading ? (
-                <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    minH="100vh"
-                >
+                <Box display="flex" justifyContent="center" alignItems="center" minH="100vh">
                     <Spinner size="xl"/>
                 </Box>
             ) : (
@@ -187,41 +178,16 @@ function UserProfile({name}: Props) {
                                 align="center"
                                 flexWrap="wrap"
                             >
-                                <Avatar.Root
-                                    size={{base: "xl", md: "2xl"}}
-                                >
-                                    <Avatar.Image
-                                        src={selectedUser.pfp}
-                                        alt={selectedUser.firstName ?? "User"}
-                                    />
-
-                                    <Avatar.Fallback>
-                                        {(selectedUser.firstName?.charAt(0) ??
-                                                "") +
-                                            (selectedUser.lastName?.charAt(0) ??
-                                                "")}
-                                    </Avatar.Fallback>
+                                <Avatar.Root size="2xl">
+                                    <Avatar.Image src={selectedUser.pfp} alt={selectedUser.firstName}/>
+                                    <Avatar.Fallback>{selectedUser.firstName.charAt(0)}{selectedUser.lastName.charAt(0)}</Avatar.Fallback>
                                 </Avatar.Root>
-
                                 <VStack align="start" gap={1}>
-                                    <Heading className="title" size="4xl">
-                                        {`${selectedUser.firstName ?? "Unknown"} ${
-                                            selectedUser.lastName ?? ""
-                                        }`}
-                                    </Heading>
-
-                                    <Text color={theme.textSecondary}>
-                                        @{selectedUser.handle}
-                                    </Text>
-
-                                    <Text color={theme.textPrimary}>
-                                        {selectedUser.bio ?? "No bio set"}
-                                    </Text>
+                                    <Heading className="title"
+                                             size="4xl">{selectedUser.firstName} {selectedUser.lastName}</Heading>
+                                    <Text color={theme.textSecondary}>@{selectedUser.handle}</Text>
+                                    <Text color={theme.textPrimary}>{selectedUser.bio ?? "No bio set"}</Text>
                                 </VStack>
-
-                                <UserProfileBadge
-                                    isBot={selectedUser.isBot}
-                                />
                             </HStack>
 
                             {!isMe ? (
@@ -249,23 +215,23 @@ function UserProfile({name}: Props) {
                                     ) : friendRequestState.receiver?.handle ===
                                     user.handle ? (
                                         <HStack>
-                                            <Button
-                                                colorScheme="blue"
+                                            <IconButton
+                                                colorPalette="blue"
                                                 onClick={() => {
-                                                    // accept request
+                                                    acceptFriendRequests(friendRequestState!!.id)
                                                 }}
                                             >
-                                                Accept Friend Request
-                                            </Button>
+                                                <FaCheck/>
+                                            </IconButton>
 
-                                            <Button
-                                                colorScheme="red"
+                                            <IconButton
+                                                colorPalette="red"
                                                 onClick={() => {
-                                                    // decline request
+                                                    declineFriendRequests(friendRequestState!!.id)
                                                 }}
                                             >
-                                                Decline Friend Request
-                                            </Button>
+                                                <FaX/>
+                                            </IconButton>
                                         </HStack>
                                     ) : (
                                         <Button
@@ -338,29 +304,16 @@ function UserProfile({name}: Props) {
                         {/* Stats */}
                         <Grid templateColumns="1fr 1fr" gap={4} py={6}>
                             <Box>
-                                <Heading color={theme.textPrimary}>
-                                    {selectedUser.friends.length}
-                                </Heading>
-
-                                <Text color={theme.textSecondary}>
-                                    Friend
-                                    {selectedUser.friends.length !== 1
-                                        ? "s"
-                                        : ""}
-                                </Text>
-                            </Box>
-
-                            <Box>
-                                <Heading color={theme.textPrimary}>
-                                    {posts.length}
-                                </Heading>
-
-                                <Text color={theme.textSecondary}>Posts</Text>
+                                <Heading color={theme.textPrimary}>{selectedUser.friends.length}</Heading>
+                                <Text color={theme.textSecondary}>Friends</Text>
                             </Box>
                         </Grid>
 
-                        <Heading>Friends</Heading>
                         <Box w="100%">
+                            <Heading size="lg" mb={4} color={theme.textPrimary}>
+                                Friends
+                            </Heading>
+
                             {selectedUser.friends.length > 0 ? (
                                 <Grid
                                     templateColumns={{
@@ -370,8 +323,8 @@ function UserProfile({name}: Props) {
                                     }}
                                     gap={4}
                                 >
-                                    {selectedUser.friends.map(
-                                        (f: User) => (
+                                    {selectedUser.friends?.map((f: User) => {
+                                        return (
                                             <VStack
                                                 key={f.id}
                                                 bg={theme.cardBg}
@@ -379,77 +332,39 @@ function UserProfile({name}: Props) {
                                                 borderRadius="lg"
                                                 p={4}
                                                 gap={3}
-                                                _hover={{
-                                                    shadow: "md",
-                                                    transform:
-                                                        "translateY(-2px)",
-                                                }}
+                                                _hover={{shadow: "md", transform: "translateY(-2px)"}}
                                                 transition="all .2s"
                                                 cursor="pointer"
-                                                onClick={() => {
-                                                    window.location.href="/app/profile/" + f.handle;
-                                                }}
+                                                onClick={() => (window.location.href = `/app/profile/${f.handle}`)}
                                             >
                                                 <Avatar.Root size="xl">
-                                                    <Avatar.Image
-                                                        src={f.pfp}
-                                                        alt={
-                                                            f.firstName ??
-                                                            "Friend"
-                                                        }
-                                                    />
-
+                                                    <Avatar.Image src={f.pfp} alt={f.firstName}/>
                                                     <Avatar.Fallback>
-                                                        {(f.firstName?.charAt(
-                                                                0
-                                                            ) ?? "") +
-                                                            (f.lastName?.charAt(
-                                                                0
-                                                            ) ?? "")}
+                                                        {(f.firstName?.charAt(0) ?? "") + (f.lastName?.charAt(0) ?? "")}
                                                     </Avatar.Fallback>
                                                 </Avatar.Root>
 
-                                                <Text
-                                                    fontWeight="600"
-                                                    color={
-                                                        theme.textPrimary
-                                                    }
-                                                >
-                                                    {f.firstName ??
-                                                        "Unknown"}
+                                                <Text fontWeight="600" color={theme.textPrimary}>
+                                                    {f.firstName} {f.lastName}
                                                 </Text>
 
-                                                <Text
-                                                    fontSize="sm"
-                                                    color={
-                                                        theme.textSecondary
-                                                    }
-                                                >
+                                                <Text fontSize="sm" color={theme.textSecondary}>
                                                     @{f.handle}
                                                 </Text>
                                             </VStack>
-                                        )
-                                    )}
+                                        );
+                                    })}
                                 </Grid>
                             ) : (
-                                <Box
-                                    py={12}
-                                    textAlign="center"
-                                    bg={theme.hoverBg}
-                                    borderRadius="lg"
-                                >
-                                    <Text
-                                        color={theme.textSecondary}
-                                    >
-                                        {selectedUser.firstName?.split(
-                                            " "
-                                        )[0] ?? "This user"}{" "}
-                                        has no friends yet, and is OH so
+                                <Box py={12} textAlign="center" bg={theme.hoverBg} borderRadius="lg">
+                                    <Text color={theme.textSecondary}>
+                                        {selectedUser.firstName.split(" ")[0]} has no friends yet, and is OH so
                                         lonely 😭.
                                     </Text>
                                 </Box>
                             )}
                         </Box>
+
                     </Box>
                 </Box>
             )}

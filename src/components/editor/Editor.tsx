@@ -10,14 +10,15 @@ import MentionSuggestion from "./SugestionRenderer";
 import {Box, Button, Dialog, FileUpload, Input, Portal, Tabs} from "@chakra-ui/react";
 import {Icon} from "lucide-react";
 import {LuImage, LuLink, LuUpload} from "react-icons/lu";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {CustomMention} from "../PostMedia/MentionExtension.tsx";
 
 interface Props {
     onChange: (content: string) => void;
+    value: string
 }
 
-export default function TipTapEditor({onChange}: Props) {
+export default function TipTapEditor({onChange, value}: Props) {
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -47,12 +48,31 @@ export default function TipTapEditor({onChange}: Props) {
                 },
             })
         ],
-
+        content: value,
         immediatelyRender: false,
         onUpdate: ({editor}) => {
             onChange(editor.getHTML());
         },
     });
+
+    useEffect(() => {
+        console.log("Editor value prop:", value);
+    }, [value]);
+
+    useEffect(() => {
+        if (!editor) return;
+
+        const current = editor.getHTML();
+
+        if (value === "") {
+            editor.commands.clearContent(true);
+            return;
+        }
+
+        if (current !== value) {
+            editor.commands.setContent(value);
+        }
+    }, [editor, value]);
 
     if (!editor) return null;
 

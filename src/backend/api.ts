@@ -68,7 +68,7 @@ export async function getFriendRequests(): Promise<FriendRequest[]> {
     return response.data;
 }
 
-export async function getFriendRequest(user: string): Promise<FriendRequest> {
+export async function getFriendRequest(user: string): Promise<FriendRequest | null> {
     const response: AxiosResponse<FriendRequest> = await api.get(`/friends/check?handle=${user}`);
     return response.data;
 }
@@ -209,6 +209,11 @@ export async function comment(body: string, postId: number): Promise<boolean> {
     )
     console.log(res)
     return res.data
+}
+
+export async function toggleLike(id: number): Promise<boolean> {
+    const response: AxiosResponse<boolean> = await api.post(`/post/${id}/like`)
+    return response.data;
 }
 
 // friends

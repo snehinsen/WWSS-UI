@@ -68,7 +68,7 @@ function MakePost({ onPost }: Props) {
                         w="100%"
                         minW={0}
                     >
-                        <TipTapEditor onChange={setBody} />
+                        <TipTapEditor onChange={setBody} value={body}/>
 
                         <HStack gap={2} justify="flex-end">
                             <Button variant="outline" onClick={handleCancel}>

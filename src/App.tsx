@@ -10,9 +10,17 @@ import SettingsPage from "./pages/SettingsPage.tsx";
 import FriendsPage from "./pages/FriendsPage.tsx";
 import DMsPage from "./pages/DMsPage.tsx";
 import PostPage from "./pages/PostPage.tsx";
+import {useUserContext} from "./context/userContext.tsx";
 
 function App() {
 
+    const {loading, user} = useUserContext();
+
+    if (!loading && user) {
+        if (!user!!.isSetup && window.location.pathname !== "/setup") {
+            window.location.href = "/setup";
+        }
+    }
 
     return (
         <Router>
